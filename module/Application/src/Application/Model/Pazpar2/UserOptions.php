@@ -94,9 +94,12 @@ class UserOptions
     {
         switch( $key )
         {
-        case 'names':
+            case 'names':
                 if ($val[0] == 'all')
-                    $targets = (new Targets())->getTargetKeys();
+                {
+                    $targets = new Targets();
+                    $targets = $targets->getTargetKeys();
+                }
                 else
                     $targets = $val; 
                 break;
@@ -104,7 +107,8 @@ class UserOptions
                 break;
             case 'subjects':
                 $subj_ids = $this->getSessionData( 'subjects' );
-                $ts = (new Subjects())->getTargetsBySubject( $subj_ids );
+                $ts = new Subjects();
+                $ts = $ts->getTargetsBySubject( $subj_ids );
                 $targets = $ts->getTargetKeys();
                 break;
             case 'distances':
