@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xerxes version="2.0.beta.1">
 
-	<default>summon</default>
+	<default>pazpar2</default>
 	
 	<controller name="asset" class="Application\Controller\AssetController">
 		<action name="labels">
@@ -54,5 +54,35 @@
 	<controller name="worldcat" class="Application\Controller\WorldcatController" inherits="search">
 		<action name="results" restricted="true" />
 		<action name="record" restricted="true" />
-	</controller>
+        </controller>
+        <controller name="pazpar2" class="Application\Controller\Pazpar2Controller" inherits="search" >
+            <action name="index">
+                <view>pazpar2/index.xsl</view>
+            </action>
+            <action name="search">
+                <view>pazpar2/search.xsl</view>
+            </action>
+            <action name="status">
+                <view>pazpar2/status.xsl</view>
+            </action>
+            <action name="results">
+                <view>pazpar2/results.xsl</view>
+            </action>
+            <action name="options">
+                <view>pazpar2/nameoptions.xsl</view>
+            </action>
+            <action name="nameoptions">
+                <view>pazpar2/nameoptions.xsl</view>
+            </action>
+            <action name="subjectoptions">
+                <view>pazpar2/subjectoptions.xsl</view>
+            </action>
+            <action name="library">
+                <view>pazpar2/library.xsl</view>
+            </action>
+            <action name="record">
+                <view>pazpar2/record.xsl</view>
+            </action>
+        </controller>
+
 </xerxes>

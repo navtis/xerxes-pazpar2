@@ -1,0 +1,21 @@
+<!-- Copies of Open Access material harvested and maintained pro bono by Index Data -->
+<settings target="opencontent/*">
+
+    <!-- OAIster -->
+    <set target="opencontent/oai" name="pz:name" value="oai"/>
+    <set target="opencontent/oai" name="server" value="oai"/>
+    <set target="opencontent/oai" name="pz:url" value="opencontent.indexdata.com:210/oaister"/>
+
+    <!-- Open Content Alliance -->
+    <set target="opencontent/oca" name="pz:name" value="oca"/> 
+    <set target="opencontent/oca" name="server" value="oca"/> 
+    <set target="opencontent/oca" name="pz:url" value="opencontent.indexdata.com:210/oca-all"/>
+
+    <!-- Project Gutenberg -->
+    <set target="opencontent/gtbg" name="pz:name" value="gtbg"/> 
+    <set target="opencontent/gtbg" name="server" value="gtbg"/> 
+    <set target="opencontent/gtbg" name="pz:url" value="opencontent.indexdata.com:210/gutenberg"/>
+
+  <!-- The following settings apply to all opencontent sites -->
+  <set name="pz:cclmap:term" value="u=1016 t=l,r s=al 2=102"/>
+</settings>

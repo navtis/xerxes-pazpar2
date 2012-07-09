@@ -1,0 +1,2 @@
+Contains sample configuration files for Pazpar2. Replace the standard Pazpar2 
+/etc directory with this to test Xerxes with Pazpar2. 

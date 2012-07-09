@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xerxes>
+
+    <configuration>
+	
+        <config name="url">http://localhost:8004/search.pz2</config>
+
+        <config name="basic_search_fields" xml="true" pass="true">
+            <field id="title" public="title" internal="ti" />
+            <field id="author" public="author" internal="au" />
+            <field id="subject"  public="subject" internal="su" />
+            <field id="isbn"  public="ISBN" internal="isbn" />
+            <field id="keyword" public="all fields" internal="any" />
+        </config>
+
+        <!-- sort fields must match pazpar2 config fields -->
+        <config name="sort_options" xml="true" pass="true">
+            <option id="title" public="Title" internal="title:1" />
+            <option id="author" public="Author" internal="author:1" />
+            <option id="date" public="Latest" internal="date:0" />
+            <option id="relevance" public="Relevance" internal="relevance" />
+        </config>
+
+        <!-- facet fields must be specified as termlists in pazpar2 config -->
+        <config name="facet_fields" xml="true" pass="true">
+        <!-- name_filters match get[Internal]Name() in Config.php -->
+        <facet public="Source library" internal="server" />
+        <facet public="Subject area" internal="subject" />
+        <facet public="Author" internal="author" />
+        <facet public="Format" internal="medium" name_filter="true" />
+        <!-- <facet public="Year" internal="date" type="date" /> -->
+        </config>
+        <!-- minimum number of items needed to show facet_list -->
+        <config name="facet_min" xml="true" pass="true">3</config>
+        <!-- number of items to display in unexpanded facet -->
+        <config name="facet_display" xml="true" pass="true">3</config>
+        <!-- maximum number of items to show in expanded facet_list -->
+        <config name="facet_max" xml="true" pass="true">50</config>
+        
+        <!-- total max records to be returned from all targets -->
+        <config name="max_records" pass="true">1000</config>
+        <!-- records to display per per page -->
+        <config name="records_per_page">30</config>
+        <!-- allowed upper limit on records_per_page -->
+        <config name="max_records_per_page">100</config>
+
+        <!-- Prefix for the name of the class which extends Pazpar2/Targets. Targets
+             may be in this config file, in a database or from a remote API (search25) -->
+        <config name="targetclass" pass="true">Config</config>
+        <!-- Prefix for the name of the class which extends Pazpar2/Subjects. Subjects
+             may be in this config file, in a database or from a remote API (search25) -->
+        <config name="subjectclass" pass="true">Config</config>
+
+        <!-- Target details for(use with pazpar2 conf files in data/pazpar2) -->
+        <!-- Used by ConfigTargets -->
+        <config name="targets" xml="true" pass="false">
+            <target display_name="OAIster" short_name="OAIster" pz2_key="oai" z3950_location="opencontent/oai" library_url="http://www.oaister.org/" type="online" linkback_url="">
+                <subject id="1">Science</subject>
+            </target>
+            <target display_name="Open Content Alliance" short_name="OCA" pz2_key="oca" z3950_location="opencontent/oca" library_url="http://www.opencontentalliance.org" type="online"  linkback_url="">
+                <subject id="2">Literature</subject>
+            </target>
+            <target display_name="Project Gutenberg" short_name="Gutenberg" pz2_key="gtbg" z3950_location="opencontent/gtbg" library_url="http://www.gutenberg.org/" type="online"  linkback_url="">
+                <subject id="2">Literature</subject>
+            </target>
+            <target display_name="Library of Congress" short_name="Congress" pz2_key="loc" z3950_location="library/loc" library_url="http://www.loc.gov" type="library"  linkback_url="" >
+                <subject id="2">Literature</subject>
+                <subject id="1">Science</subject>
+            </target>
+            <!-- offline? 
+                <target display_name="University of California" short_name="UCLA" pz2_key="ucla" z3950_location="library/ucla" library_url="http://www.library.ucla.edu/" type="library" linkback_url="" >
+                <subject id="2">Literature</subject>
+                <subject id="1">Science</subject>
+            </target>
+            -->
+                <target display_name="California State Library" short_name="Cal State" pz2_key="cal" z3950_location="library/cal" library_url="http://www.library.ca.gov/" type="library" linkback_url="" >
+                <subject id="2">Literature</subject>
+                <subject id="1">Science</subject>
+            </target>
+                <target display_name="Oxford University" short_name="Oxford" pz2_key="ox" z3950_location="library/ox" library_url="http://www.ox.ac.uk/research/libraries/index.html" type="library" linkback_url="" >
+                <subject id="2">Literature</subject>
+                <subject id="1">Science</subject>
+            </target>
+        </config>
+
+        <config name="affiliations" xml="true" pass="true">
+            <affiliation id="public" public="Public" role="any"/>
+            <affiliation id="lse.ac.uk" public="London School of Economics" role="lecturer,student"/>
+        </config>
+
+        <config name="groupby" xml="true" pass="true">
+            <option id="name" public="By name" url="/pazpar2/nameoptions" />
+            <option id="subject" public="By subject" url="/pazpar2/subjectoptions" />
+            <!-- options not yet available -->
+            <!--
+            <option id="access" public="By access right" url="/pazpar2/accessoptions" />
+            <option id="type" public="By type" url="/pazpar2/typeoptions" />
+            <option id="distance" public="By distance" url="/pazpar2/distanceoptions" />
+            -->
+        </config>
+
+        <!-- do we support 'more like this' issn/isbn based links? -->
+        <config name="external_isn_link" xml="true" pass="true">false</config>
+
+    </configuration>
+	
+</xerxes>

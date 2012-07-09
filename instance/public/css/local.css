@@ -6,3 +6,188 @@
 
 **********************************************************************/
 
+/* @import url("/javascript/jquery/css/jquery-ui-1.8.16.custom.css") */
+
+/* experimental additions for pazpar2 */
+
+/* info boxes for flashMessages */
+
+/* borrowed from http://css.dzone.com/news/css-message-boxes-different-me */
+.info-box, .success-box, .warning-box, .error-box {
+    border: 1px solid;
+    margin: 10px 0px;
+    padding:15px 10px 15px 50px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    /* float with a bit of grey shadow */
+    -moz-box-shadow:    1px 1px 5px 6px #ccc;
+    -webkit-box-shadow: 1px 1px 5px 6px #ccc;
+    box-shadow:         1px 1px 5px 6px #ccc;
+}
+
+.info-box {
+    color: #00529B;
+    background-color: #BDE5F8;
+    background-image: url('../images/info.png');
+}
+
+.success-box {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    background-image:url('../images/success.png');
+}
+
+.warning-box {
+    color: #9F6000;
+    background-color: #FEEFB3;
+    background-image: url('../images/warning.png');
+}
+
+.error-box {
+    color: #D8000C;
+    background-color: #FFBABA;
+    background-image: url('../images/error.png')
+}
+
+/* Options pages */
+
+.set-option{
+	margin-top: 1em;
+}
+
+#button-column input{
+	margin: 1em 1em 0.5em 1em;
+}
+
+/* Optional external links */
+li.hidden {
+    display: none;
+}
+
+#tabnav {
+    background: url("../images/tabs/bg.png") repeat-x scroll center bottom #FFFFFF;
+    float: left;
+    line-height: normal;
+    margin-right: 10px;
+    padding-left: 10px;
+    width: 99%;
+}
+
+#tabnav .here {
+    background-image: url("../images/tabs/left_on.png");
+}
+
+/* Search results */
+
+.tabs .results-pager{
+    float: right;
+    position: relative;
+    margin-top: -40px;
+    margin-bottom: 0;
+}
+
+
+/* new short record field */
+
+.results-edition {
+    display: block;
+    margin-bottom: 0.35em;
+}
+
+/* de-emphasize language */
+.results-language {
+    color: #777777;
+}
+
+/* float bookcover and record-summary side by side */
+.book-record-cover {
+    float: left;
+}
+
+#record-summary {
+    float: left;
+}
+
+/* for additional target status column on right of results page */
+
+.status {
+    float: right;
+    display: block;
+    width: 25%;
+    background-color: white;
+}
+.status li span.working {
+    color: #FFAC00; /* amber */
+    color: black;
+}
+
+.status li span.failed {
+    color: red;
+}
+/** progress bar */
+
+div#progress_container {
+    border: 6px double #ccc;
+    width: 200px;
+    margin-top: 15px;
+    padding: 0;
+    float: left;
+}
+div#progress{ 
+    color: #FFF;
+    background-color: #FF8D40;
+    height: 12px;
+    padding-bottom: 2px;
+    font-size: 12px;
+    text-align: center;
+    overflow: hidden;
+    line-height: 1.2em;
+}
+
+#terminator {
+    margin-left: 5px;
+    margin-top: 15px;
+    float:left;
+}
+
+/** RESULTS **/
+
+/* allow for target status width of 25% */
+#results-block{
+    width: 70%; 
+}
+
+*/
+.results-title {
+	font-weight: bold;
+    color: #003333; 
+}
+
+.results-holdings ul {
+  margin-top: 0.5em;
+  list-style-type: square;
+}
+.results-holdings li {
+	list-style: square;
+	margin-left: 3em;
+}
+.region-targets ul {
+    margin-top: 1em;
+    margin-left: 2em;
+}
+.region-targets li {
+    margin-left: 2em;
+}
+.region-targets .title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #003366;
+    margin: 1em 1em 1em 1em; /* left margin does nothing; why? */
+    font-size: 110%;
+    font-weight: bold;
+}
+.region-targets input {
+    margin-right: 1em;
+}
+.subjectDatabaseInfo a{
+    margin-left: 1em;
+}

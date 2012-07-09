@@ -81,11 +81,14 @@
 	
 		<!-- Connection string, username, and password for local database: Xerxes uses PDO for database access, 
 		     so connection strings should be in that format -->
-		
-		<config name="database_connection">mysql:host=localhost;dbname=xerxes</config>
+                <config name="database_connection">mysql:host=localhost;dbname=xerxes</config>
+                <config name="database_username">x3rxes</config>
+                <config name="database_password">shahanshah</config>
+
+                <!--		<config name="database_connection">mysql:host=localhost;dbname=xerxes</config>
 		<config name="database_username"></config>
 		<config name="database_password"></config>
-		
+	        -->	
 		
 	<!-- PROXY, LINK RESOLVER, AND EXTERNAL APIS -->
 		

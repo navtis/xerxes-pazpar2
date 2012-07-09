@@ -1,0 +1,24 @@
+<!-- Some Public Libraries with freely usable z39.50 servers -->
+<settings target="library/*">
+
+    <!-- Library of Congress -->
+    <set target="library/loc" name="pz:name" value="loc"/>
+    <set target="library/loc" name="server" value="loc"/>
+    <set target="library/loc" name="pz:url" value="z3950.loc.gov:7090/voyager"/>
+
+    <!-- University of California -->
+    <set target="library/ucla" name="pz:name" value="ucla"/>
+    <set target="library/ucla" name="server" value="ucla"/>
+    <set target="library/ucla" name="pz:url" value="melvyl.cdlib.org:210/CDL90"/>
+
+    <!-- California State Libraries-->
+    <set target="library/cal" name="pz:name" value="cal"/>
+    <set target="library/cal" name="server" value="cal"/>
+    <set target="library/cal" name="pz:url" value="catalog.library.ca.gov:9991/CSL01PUB"/>
+
+    <!-- Oxford University -->
+    <set target="library/ox" name="pz:name" value="ox"/>
+    <set target="library/ox" name="server" value="ox"/>
+    <set target="library/ox" name="pz:url" value="library.ox.ac.uk:210/ALEPH"/>
+
+</settings>

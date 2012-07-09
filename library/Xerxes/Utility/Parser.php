@@ -581,7 +581,6 @@ class Parser
 		$object_xml = null;
 	
 		// no value, no mas!
-	
 		if ( $object == "" )
 		{
 			return null;
