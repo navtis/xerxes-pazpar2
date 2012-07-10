@@ -40,7 +40,7 @@
 </xsl:template>
 
 <xsl:template name="sidebar">
-	<xsl:call-template name="options_sidebar" />
+	<!--	<xsl:call-template name="options_sidebar" /> -->
 </xsl:template>
 
 <xsl:template name="main">

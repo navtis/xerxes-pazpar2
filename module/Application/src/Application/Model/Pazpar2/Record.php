@@ -9,7 +9,6 @@ use Xerxes,
         Xerxes\Record\Chapter,
         Xerxes\Record\Subject as XSubject,
     Xerxes\Record\Link,
-    Application\Model\Search\Item,
     Application\Model\Search\Holding;
 
 /**

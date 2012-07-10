@@ -64,7 +64,6 @@
 		</div>
 	</xsl:template>
 
-
     <!-- override search/results tab so no count unless live -->
     <xsl:template name="tab"> 
         <xsl:for-each select="option"> 
@@ -87,5 +86,61 @@
             </li> 
 	</xsl:for-each> 
     </xsl:template>
+
+
+	<!--
+		TEMPLATE: ACCOUNT OPTIONS
+		links to login, options, my saved records, and other personalization features
+	-->	
+	
+	<xsl:template name="account_options">
+	
+		<ul>
+			<xsl:if test="//config/uselogin">
+			<li id="login-option">
+				<xsl:choose>
+					<xsl:when test="//request/session/role and //request/session/role = 'named'">
+					
+						<xsl:call-template name="img_logout" />
+						<xsl:text> </xsl:text>
+					
+						<a id="logout">
+						<xsl:attribute name="href"><xsl:value-of select="//navbar/logout_link" /></xsl:attribute>
+							<xsl:copy-of select="$text_header_logout" />
+						</a>
+						
+					</xsl:when>
+					<xsl:otherwise>
+					
+						<xsl:call-template name="img_login" />
+						<xsl:text> </xsl:text>			
+
+						<a id="login">
+						<xsl:attribute name="href"><xsl:value-of select="//navbar/login_link" /></xsl:attribute>
+							<xsl:copy-of select="$text_header_login" />
+						</a>
+					</xsl:otherwise>
+				</xsl:choose>
+			</li>
+		</xsl:if>
+		<li><img src="images/famfamfam/user.png"/>
+			<a href="/pazpar2/options">User options</a>
+		</li>
+
+			<li id="my-saved-records" class="sidebar-folder">
+				<xsl:call-template name="img_save_record">
+					<xsl:with-param name="id">folder</xsl:with-param>
+					<xsl:with-param name="test" select="count(//session/resultssaved) &gt; 0" />
+				</xsl:call-template>
+				<xsl:text> </xsl:text>
+				<a>
+				<xsl:attribute name="href"><xsl:value-of select="//navbar/my_account_link" /></xsl:attribute>
+					<xsl:copy-of select="$text_header_savedrecords" />
+				</a>
+			</li>
+			
+		</ul>	
+	
+	</xsl:template>
 
 </xsl:stylesheet>

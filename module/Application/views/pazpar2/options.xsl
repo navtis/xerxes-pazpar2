@@ -56,21 +56,19 @@
 
     <xsl:if test="config/groupby"> 
         <div class="tabs"> 
-            <xsl:for-each select="config/groupby"> 
-                <ul id="tabnav"> 
-                    <xsl:call-template name="tab" > 
-                        <xsl:with-param name="template" select="$template"/>
-                    </xsl:call-template>
-                </ul> 
-                <div style="clear:both"></div> 
-            </xsl:for-each> 
+	    <ul id="tabnav"> 
+		<xsl:call-template name="tab" > 
+                      <xsl:with-param name="template" select="$template"/>
+                </xsl:call-template>
+            </ul> 
+            <div style="clear:both"></div> 
         </div> 
     </xsl:if> 
 </xsl:template>
 
 <xsl:template name="tab">
-    <xsl:param name="template"/>
-    <xsl:for-each select="option"> 
+	<xsl:param name="template"/>
+	<xsl:for-each select="config/groupby/option"> 
         <li id="tab-{@id}">
             <xsl:choose>
                 <xsl:when test="boolean(@id = $template)"> 

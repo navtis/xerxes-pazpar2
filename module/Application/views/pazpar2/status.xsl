@@ -35,7 +35,9 @@
 	<xsl:import href="search.xsl" /> 
 
     <xsl:template match="/*">
-            <xsl:call-template name="surround" />
+	<xsl:call-template name="surround">
+		<xsl:with-param name="sidebar">none</xsl:with-param>
+	</xsl:call-template>
     </xsl:template>
 
     <!-- refresh to keep updating status -->
@@ -50,10 +52,6 @@
 	<script src="javascript/pz2_status.js" language="javascript" type="text/javascript"></script> 
     </xsl:template>
 
-    <xsl:template name="sidebar">
-	    <xsl:call-template name="options_sidebar" />
-    </xsl:template>
-	
 	<xsl:template name="main">
 
 		<h1><xsl:value-of select="$text_search_module" /></h1>

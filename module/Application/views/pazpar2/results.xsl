@@ -59,13 +59,13 @@
             <h1><xsl:value-of select="$text_search_module" /></h1> 
             <xsl:call-template name="searchbox" /> 
         </div> 
-        <div class="yui-u"> 
+	<!--        <div class="yui-u"> 
             <div class="sidebar"> 
                 <xsl:call-template name="options_sidebar" /> 
             </div> 
-        </div> 
+	</div>
+	-->
     </div> 
-    <xsl:call-template name="tabs" /> 
     <xsl:variable name="sidebar"> 
         <xsl:choose> 
             <xsl:when test="//config/search_sidebar = 'right'"> 
@@ -92,9 +92,7 @@
                     <xsl:text> first</xsl:text> 
             </xsl:if> </xsl:attribute> 
             <xsl:call-template name="facets_applied" /> 
-            <div class="tabs"> 
                 <xsl:call-template name="sort_bar" /> 
-            </div>
             <!-- insert status info in right column (see local.css) GS -->
             <!-- omitted for now after user feedback
             <div class="sidebar status"> 
@@ -173,10 +171,11 @@
 			<xsl:otherwise>
 
 	
-				<div id="sort">
+				<div id="pz2sort">
 					<div class="yui-g" style="width: 100%">
 						<div class="yui-u first">
 							<xsl:copy-of select="$text_metasearch_results_summary" />
+							<xsl:call-template name="paging_navigation"/>
 						</div>
 						<div class="yui-u">
 							<xsl:choose>

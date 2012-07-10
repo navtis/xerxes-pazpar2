@@ -1,0 +1,183 @@
+[
+    {
+        "name": "zendframework/zendframework",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "git://github.com/zendframework/zf2.git",
+            "reference": "c1273a4ea7ab16ecb0be1f53c211c80a27ffee9a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://github.com/zendframework/zf2/zipball/888f7b435164932c9423e1ee5363cbb42ce84abe",
+            "reference": "888f7b435164932c9423e1ee5363cbb42ce84abe",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.3"
+        },
+        "replace": {
+            "zendframework/zend-acl": "self.version",
+            "zendframework/zend-amf": "self.version",
+            "zendframework/zend-authentication": "self.version",
+            "zendframework/zend-barcode": "self.version",
+            "zendframework/zend-cache": "self.version",
+            "zendframework/zend-captcha": "self.version",
+            "zendframework/zend-cloud": "self.version",
+            "zendframework/zend-code": "self.version",
+            "zendframework/zend-config": "self.version",
+            "zendframework/zend-console": "self.version",
+            "zendframework/zend-crypt": "self.version",
+            "zendframework/zend-db": "self.version",
+            "zendframework/zend-di": "self.version",
+            "zendframework/zend-docbook": "self.version",
+            "zendframework/zend-dojo": "self.version",
+            "zendframework/zend-dom": "self.version",
+            "zendframework/zend-eventmanager": "self.version",
+            "zendframework/zend-feed": "self.version",
+            "zendframework/zend-file": "self.version",
+            "zendframework/zend-filter": "self.version",
+            "zendframework/zend-form": "self.version",
+            "zendframework/zend-gdata": "self.version",
+            "zendframework/zend-http": "self.version",
+            "zendframework/zend-infocard": "self.version",
+            "zendframework/zend-inputfilter": "self.version",
+            "zendframework/zend-json": "self.version",
+            "zendframework/zend-ldap": "self.version",
+            "zendframework/zend-loader": "self.version",
+            "zendframework/zend-log": "self.version",
+            "zendframework/zend-mail": "self.version",
+            "zendframework/zend-markup": "self.version",
+            "zendframework/zend-math": "self.version",
+            "zendframework/zend-memory": "self.version",
+            "zendframework/zend-mime": "self.version",
+            "zendframework/zend-modulemanager": "self.version",
+            "zendframework/zend-mvc": "self.version",
+            "zendframework/zend-navigation": "self.version",
+            "zendframework/zend-oauth": "self.version",
+            "zendframework/zend-openid": "self.version",
+            "zendframework/zend-paginator": "self.version",
+            "zendframework/zend-pdf": "self.version",
+            "zendframework/zend-progressbar": "self.version",
+            "zendframework/zend-queue": "self.version",
+            "zendframework/zend-rest": "self.version",
+            "zendframework/zend-search-lucene": "self.version",
+            "zendframework/zend-serializer": "self.version",
+            "zendframework/zend-server": "self.version",
+            "zendframework/zend-service-agilezen": "self.version",
+            "zendframework/zend-service-akismet": "self.version",
+            "zendframework/zend-service-amazon": "self.version",
+            "zendframework/zend-service-audioscrobbler": "self.version",
+            "zendframework/zend-service-delicious": "self.version",
+            "zendframework/zend-service-developergarden": "self.version",
+            "zendframework/zend-service-flickr": "self.version",
+            "zendframework/zend-service-gogrid": "self.version",
+            "zendframework/zend-service-livedocx": "self.version",
+            "zendframework/zend-service-nirvanix": "self.version",
+            "zendframework/zend-service-rackspace": "self.version",
+            "zendframework/zend-service-recaptcha": "self.version",
+            "zendframework/zend-service-slideshare": "self.version",
+            "zendframework/zend-service-strikeiron": "self.version",
+            "zendframework/zend-service-technorati": "self.version",
+            "zendframework/zend-service-twitter": "self.version",
+            "zendframework/zend-service-windowsazure": "self.version",
+            "zendframework/zend-servicemanager": "self.version",
+            "zendframework/zend-session": "self.version",
+            "zendframework/zend-soap": "self.version",
+            "zendframework/zend-stdlib": "self.version",
+            "zendframework/zend-tag": "self.version",
+            "zendframework/zend-test": "self.version",
+            "zendframework/zend-text": "self.version",
+            "zendframework/zend-timesync": "self.version",
+            "zendframework/zend-uri": "self.version",
+            "zendframework/zend-validator": "self.version",
+            "zendframework/zend-view": "self.version",
+            "zendframework/zend-wildfire": "self.version",
+            "zendframework/zend-xmlrpc": "self.version",
+            "zendframework/zend-escaper": "self.version",
+            "zendframework/zend-i18n": "self.version"
+        },
+        "require-dev": {
+            "doctrine/common": ">=2.1"
+        },
+        "suggest": {
+            "doctrine/common": "Doctrine\\Common >=2.1 for annotation features"
+        },
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "2.0-dev"
+            }
+        },
+        "installation-source": "source",
+        "license": [
+            "BSD-3-Clause"
+        ],
+        "description": "Zend Framework 2",
+        "homepage": "http://framework.zend.com/",
+        "keywords": [
+            "framework",
+            "zf2"
+        ],
+        "autoload": {
+            "psr-0": {
+                "Zend": "library/"
+            }
+        }
+    },
+    {
+        "name": "pear-pear/Structures_LinkedList",
+        "version": "0.2.2",
+        "version_normalized": "0.2.2.0",
+        "dist": {
+            "type": "pear",
+            "url": "http://pear.php.net/get/Structures_LinkedList-0.2.2.tgz",
+            "reference": null,
+            "shasum": null
+        },
+        "require": {
+            "php": ">=5.0"
+        },
+        "type": "library",
+        "installation-source": "dist",
+        "license": [
+            "Apache License, Version 2.0"
+        ],
+        "description": "A singly-linked list offers the ability to insert or delete\n nodes at any point within the list. A doubly-linked list also offers the\n ability to request previous nodes in the list.",
+        "autoload": {
+            "classmap": [
+                ""
+            ]
+        }
+    },
+    {
+        "name": "pear-pear/File_MARC",
+        "version": "0.7.1",
+        "version_normalized": "0.7.1.0",
+        "dist": {
+            "type": "pear",
+            "url": "http://pear.php.net/get/File_MARC-0.7.1.tgz",
+            "reference": null,
+            "shasum": null
+        },
+        "require": {
+            "php": ">=5.2",
+            "pear-pear/structures_linkedlist": "*"
+        },
+        "suggest": {
+            "pear-pear/Validate_ISPN": "*"
+        },
+        "type": "library",
+        "installation-source": "dist",
+        "license": [
+            "GNU Lesser General Public License"
+        ],
+        "description": "The standard for machine-readable cataloging (MARC) records is documented at http://loc.gov/marc/. This package enables you to read existing MARC records from a file, string, or (using the YAZ extension), from a Z39.50 source. You can also use this package to create new MARC records.\n\nThis package is based on the PHP MARC package, originally called &quot;php-marc&quot;, that is part of the Emilda Project (http://www.emilda.org).  Christoffer Landtman generously agreed to make the &quot;php-marc&quot; code available under the GNU LGPL so it could be used as the basis of this PEAR package.",
+        "autoload": {
+            "classmap": [
+                ""
+            ]
+        }
+    }
+]
