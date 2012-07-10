@@ -34,7 +34,11 @@
 	
 	<xsl:template name="module_header">
 	
-		<link href="css/books.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
+		<xsl:if test="$is_mobile = 0">
+	
+			<link href="css/books.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
+			
+		</xsl:if>
 	
 	</xsl:template>
 
@@ -63,7 +67,11 @@
 			
 			<!-- google javascript lookup -->
 			
-			<xsl:call-template name="google_preview" />
+			<xsl:if test="is_mobile = 1">
+			
+				<xsl:call-template name="google_preview" />
+				
+			</xsl:if>
 		</div>
 		
 		<div style="clear:both"></div>
@@ -105,11 +113,18 @@
 
 	<xsl:template name="brief_results">
 	
-		<ul id="results">
+		<ul id="results" data-role="listview" data-inset="true">
 		
 		<xsl:for-each select="//records/record/xerxes_record">
 
-			<xsl:call-template name="brief_result_book" />
+			<xsl:choose>
+				<xsl:when test="$is_mobile = 1">
+					<xsl:call-template name="brief_result_book_mobile" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:call-template name="brief_result_book" />
+				</xsl:otherwise>
+			</xsl:choose>
 
 		</xsl:for-each>
 		
@@ -143,18 +158,9 @@
 				<!-- title -->
 				
 				<div class="results-title">
-					<a href="{../url}" class="results-title">
-						
-						<xsl:value-of select="title_normalized" />
-						
-						<!-- conference or corporate name at end to distinguish annual reports, etc. -->
-						
-						<xsl:if test="authors/author[@type='conference' or @type='corporate' and not(@additional)]">
-							<xsl:text> / </xsl:text>
-							<xsl:value-of select="authors/author[@type='conference' or @type='corporate' and not(@additional)]/aucorp" />
-						</xsl:if>
-						
-					</a>
+				
+					<xsl:call-template name="results_title" />
+
 				</div>
 				
 				<div class="results-info">
@@ -182,13 +188,17 @@
 							</div>
 						</xsl:if>
 						
-						<xsl:if test="primary_author">
+						<xsl:if test="primary_author or publisher or year">
 							<div class="results-book-summary">
 								<xsl:if test="format/internal != 'JFULL'">
 								
 									<!-- author -->
+									
+									<xsl:if test="primary_author">
 								
-									<xsl:copy-of select="$text_results_author" />: <xsl:value-of select="primary_author" /><br />
+										<xsl:copy-of select="$text_results_author" />: <xsl:value-of select="primary_author" /><br />
+										
+									</xsl:if>
 								
 									<!-- publication info -->
 								
@@ -228,6 +238,41 @@
 				</div>
 			</div>
 		</li>
+	
+	</xsl:template>
+
+	<!-- 
+		TEMPLATE: BRIEF RESULTS BOOK MOBILE
+	-->
+	
+	<xsl:template name="brief_result_book_mobile">
+	
+		<li class="result">
+		
+			<xsl:call-template name="results_title" />
+			
+		</li>
+	
+	</xsl:template>
+
+	<!-- 
+		TEMPLATE: RESULTS TITLE
+	-->
+	
+	<xsl:template name="results_title">
+	
+		<a href="{../url}" class="results-title">
+			
+			<xsl:value-of select="title_normalized" />
+			
+			<!-- conference or corporate name at end to distinguish annual reports, etc. -->
+			
+			<xsl:if test="authors/author[@type='conference' or @type='corporate' and not(@additional)]">
+				<xsl:text> / </xsl:text>
+				<xsl:value-of select="authors/author[@type='conference' or @type='corporate' and not(@additional)]/aucorp" />
+			</xsl:if>
+			
+		</a>	
 	
 	</xsl:template>
 
@@ -297,7 +342,7 @@
 					
 						<xsl:choose>
 						
-							<xsl:when test="../holdings/holdings">
+							<xsl:when test="../holdings[holdings|electronicResources]">
 							
 								<xsl:call-template name="availability_lookup_holdings">
 									<xsl:with-param name="context" select="$context" />
@@ -428,6 +473,27 @@
 			<xsl:call-template name="full_text_links"/>
 			
 		</xsl:if>
+
+		<xsl:if test="../holdings/electronicResources">
+	
+			<p><strong>Online</strong></p>
+			
+			<table class="holdings-table">
+			<tr>
+				<th>Database</th>
+				<th>Coverage</th>
+				<th>Information</th>
+			</tr>
+			<xsl:for-each select="../holdings/electronicResources/electronicResource">
+				<tr>
+					<td><a href="{link}"><xsl:value-of select="database" /></a></td>
+					<td><xsl:value-of select="coverage" /></td>
+					<td><a href="{package}">About resource</a></td>
+				</tr>
+			</xsl:for-each>
+			</table>
+			
+		</xsl:if>
 		
 		<xsl:if test="../holdings/holdings">
 	
@@ -436,23 +502,24 @@
 			<xsl:for-each select="../holdings/holdings/holding">
 				<ul class="holdings-summary-statement">
 					<xsl:for-each select="data">
-						<li><xsl:value-of select="@key" />: <xsl:value-of select="@value" /></li>
+						<li><xsl:value-of select="@key" />: <xsl:value-of select="text()" /></li>
 					</xsl:for-each>
 				</ul>
 			</xsl:for-each>
 			
 		</xsl:if>
-	
+		
 		<xsl:if test="$context = 'record'">
 		
 			<xsl:if test="../holdings/items/item">
 		
-				<p><strong><xsl:value-of select="$temp_text_bound_volumes" /></strong></p>					
+				<p><strong>Bound Volumes</strong></p>
 				<xsl:call-template name="availability_item_table" />
 				
 			</xsl:if>
 		
 		</xsl:if>
+		
 	</xsl:template>
 	
 	
@@ -483,9 +550,9 @@
 	
 		<div>
 			<xsl:attribute name="class">
-				<xsl:text>booksAvailable</xsl:text>
+				<xsl:text>book-available</xsl:text>
 				<xsl:if test="//request/action = 'record'">
-					<xsl:text> booksAvailableRecord</xsl:text>
+					<xsl:text> book-available-record</xsl:text>
 				</xsl:if>
 			</xsl:attribute>
 			

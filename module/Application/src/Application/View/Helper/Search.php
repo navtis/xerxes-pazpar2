@@ -89,8 +89,7 @@ class Search
 			return null;
 		}
 		
-		$objXml = new \DOMDocument( );
-		$objXml->loadXML( "<pager />" );
+		$objXml = Parser::convertToDOMDocument( "<pager />" );
 		
 		$base_record = 1; // starting record in any result set
 		$page_number = 1; // starting page number in any result set
@@ -218,8 +217,7 @@ class Search
 			return null;
 		}
 		
-		$xml = new \DOMDocument();
-		$xml->loadXML( "<sort_display />" );
+		$xml = Parser::convertToDOMDocument( "<sort_display />" );
 		
 		$x = 1;
 		
@@ -306,26 +304,37 @@ class Search
 			{
 				foreach ( $group->getFacets() as $facet )
 				{
-					// existing url
-						
-					$url = $this->facetParams();
-							
-					// now add the new one
-							
+					
+					$param_name = '';
+												
 					if ( $facet->key != "" ) 
 					{
 						// key defines a way to pass the (internal) value
 						// in the param, while the name is the display value
 						
-						$url["facet." . $group->name . "." . 
-							urlencode($facet->key)] = $facet->name;
+						$param_name = 'facet.' . $group->name . '.' . urlencode($facet->key);
 					}
 					else
 					{
-						$url["facet." . $group->name] = $facet->name;									
+						$param_name = 'facet.' . $group->name;									
 					}
-							
+					
+					// existing url plus our param
+					
+					$url = $this->facetParams();
+					$url[$param_name] = $facet->name;
 					$facet->url = $this->request->url_for($url);
+					
+					// add the name of the param as well
+					
+					$facet->param_name = $param_name;
+					
+					// see if this facet is selected (for multi-select facets)
+					
+					if ( $this->request->hasParamValue($param_name, $facet->name) )
+					{
+						$facet->selected = true;
+					}
 				}
 			}
 		}
@@ -372,6 +381,7 @@ class Search
 				$params['controller'] = $controller_map->getUrlAlias((string) $option["id"]);
 				$params['action'] = "results";
 				$params['source'] = (string) $option["source"];
+				$params['sort'] = $this->request->getParam('sort');
 				
 				$url = $this->request->url_for($params);
 				
@@ -402,7 +412,11 @@ class Search
 		foreach ( $query->getLimits() as $limit )
 		{
 			$params = $this->currentParams();
-			$params = Parser::removeFromArray($params, $limit->field, $limit->value);
+			
+			// urlencode here necessary to support the urlencode above on 'key' urls
+			
+			$params = Parser::removeFromArray($params, urlencode($limit->field), $limit->value);
+			
 			$limit->remove_url = $this->request->url_for($params);
 		}
 	}
@@ -426,18 +440,6 @@ class Search
 				
 			$spelling->url = $this->request->url_for($params);
 		}
-	}
-	
-	
-	/**
-	 * Link for spelling correction
-	 */
-	
-	public function linkSpelling($field, $query)
-	{
-
-		
-		return $this->request->url_for($params);
 	}
 	
 	/**
@@ -534,7 +536,10 @@ class Search
 	
 	public function facetParams()
 	{
-		return $this->currentParams();
+		$params = $this->currentParams();
+		$params["start"] = null; // send us back to page 1
+		
+		return $params;
 	}	
 	
 	/**

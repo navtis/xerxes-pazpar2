@@ -7,14 +7,14 @@ use Application\View\Helper\Navigation,
 	Xerxes\Utility\Request,
 	Xerxes\Utility\Registry,
 	Xerxes\Utility\ViewRenderer,
-	Zend\EventManager\EventCollection,
-	Zend\EventManager\ListenerAggregate,
+	Zend\EventManager\EventManagerInterface,
+	Zend\EventManager\ListenerAggregateInterface,
 	Zend\Stdlib\ResponseDescription as Response,
 	Zend\View\Model,
 	Zend\View\View,
 	Zend\View\ViewEvent;
 
-class Strategy implements ListenerAggregate
+class Strategy implements ListenerAggregateInterface
 {
 	protected $listeners = array(); // listeners
 	protected $renderer; // xerxes view renderer
@@ -53,7 +53,7 @@ class Strategy implements ListenerAggregate
 	 * @return void
 	 */	
 	
-	public function attach(EventCollection $events, $priority = 1)
+	public function attach(EventManagerInterface $events, $priority = 1)
 	{
 		$this->listeners[] = $events->attach('renderer', array($this, 'selectRenderer'), $priority);
 		$this->listeners[] = $events->attach('response', array($this, 'injectResponse'), $priority);
@@ -66,7 +66,7 @@ class Strategy implements ListenerAggregate
 	 * @return void
 	 */	
 	
-	public function detach(EventCollection $events)
+	public function detach(EventManagerInterface $events)
 	{
 		foreach ( $this->listeners as $index => $listener ) 
 		{
@@ -110,6 +110,46 @@ class Strategy implements ListenerAggregate
 			$nav = new Navigation($e);
 			$model->setVariable("navbar", $nav->getNavbar());
 			
+			
+			
+			
+			### flatten model
+			
+			// @todo this seems really hacky, but our view renderer
+			// has no notion of children, so this makes our lives easier
+			
+			foreach ( $model->getChildren() as $child )
+			{
+				// template specified
+				
+				$model->setTemplate($child->getTemplate());
+				
+				// terminate this?
+				
+				$model->setTerminal($child->terminate());
+				
+				// options
+				
+				$options = $child->getOptions();
+				
+				foreach ( $options as $id => $value )
+				{
+					$model->setOption($id, $value);
+				}				
+				
+				// variables
+				
+				$child_variables = $child->getVariables();
+						
+				foreach ( $child_variables as $id => $value )
+				{
+					$model->setVariable($id, $value);
+				}
+			}
+			
+			
+			
+			
 			// show internal xml
 			
 			if ( $request->getParam('format') == 'xerxes' )
@@ -123,7 +163,7 @@ class Strategy implements ListenerAggregate
 			{
 				// determine which view script to use
 				
-				if ( $e->getResponse()->getStatusCode() != 200 )
+				if ( $e->getResponse()->getStatusCode() != 200 ) // @todo investigate error render strategy
 				{
 					$model->setVariable("display_exceptions", true);
 					$model->setTemplate('error/index.phtml');

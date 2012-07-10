@@ -10,31 +10,18 @@ use Application\Model\Authentication\AuthenticationFactory,
 	Xerxes\Utility\Request,
 	Zend\EventManager\StaticEventManager,
 	Zend\Http\PhpEnvironment\Response as HttpResponse,
-	Zend\Module\Consumer\AutoloaderProvider,
-	Zend\Module\Manager,
 	Zend\Mvc\MvcEvent;
 
-class Module implements AutoloaderProvider
+class Module
 {
 	protected $request; // xerxes request object
 	protected $controller_map; // xerxes controller map
 	
-	public function init(Manager $moduleManager)
-	{
-		$events = StaticEventManager::getInstance();
-		$events->attach('bootstrap', 'bootstrap', array($this, 'bootstrap'), 100);
-	}
-	
 	public function getAutoloaderConfig()
 	{
 		return array(
-			'Zend\Loader\ClassMapAutoloader' => array(
-				__DIR__ . '/autoload_classmap.php',
-			),
 			'Zend\Loader\StandardAutoloader' => array(
 				'namespaces' => array(
-					__NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-					'Xerxes' => __DIR__ . '/../../library/Xerxes',
 					'Local' => 'custom',
 				),
 			),
@@ -63,7 +50,13 @@ class Module implements AutoloaderProvider
 		return $config;
 	}
 	
-	public function bootstrap($e)
+	/**
+	 * Bootstrap the module
+	 * 
+	 * @param mixed $event
+	 */
+	
+	public function onBootstrap($e)
 	{
 		$app = $e->getParam('application');
 		
@@ -79,6 +72,13 @@ class Module implements AutoloaderProvider
 		
 		$app->events()->attach('render', array($this, 'registerViewStrategy'), 100);
 	}
+	
+	/**
+	 * Retrieve a populated Xerxes Request object
+	 * 
+	 * @param MvcEvent $e
+	 * @return Request
+	 */
 	
 	public function getRequest(MvcEvent $e)
 	{
@@ -117,6 +117,12 @@ class Module implements AutoloaderProvider
 		return $this->request;
 	}
 	
+	/**
+	 * Retrieved a populated Xerxes ControllerMap
+	 * 
+	 * @return ControllerMap
+	 */
+	
 	public function getControllerMap()
 	{
 		if ( ! $this->controller_map instanceof ControllerMap )
@@ -126,6 +132,12 @@ class Module implements AutoloaderProvider
 		
 		return $this->controller_map;
 	}
+	
+	/**
+	 * Perform an authentication check on this request
+	 *  
+	 * @param MvcEvent $e
+	 */
 	
 	public function checkAuthentication(MvcEvent $e)
 	{
@@ -138,33 +150,6 @@ class Module implements AutoloaderProvider
 		// get user from session
 		
 		$user = $request->getUser(); 
-		
-		
-		
-		##### xerxes 1 transition hack  @todo remove this
-		
-		if ( $user->isLocal() || $user->isGuest() )
-		{
-			foreach ( $_COOKIE as $key => $value )
-			{
-				if ( ( strstr($key, 'xerxessession')) )
-				{
-					if ( $user->username != $value )
-					{
-						$username = Parser::removeRight($user->username, '@');
-						
-						$request->setSessionData("username", $username . '@' . $value);
-						$user = $request->getUser();
-					}
-					
-					break;
-				}
-			}
-		}
-		
-		###### end hack
-		
-		
 		
 		// this action requires authentication
 		
@@ -208,13 +193,19 @@ class Module implements AutoloaderProvider
 		}
 	}
 	
+	/**
+	 * Hook-up our custom XSLT-based view layer
+	 * 
+	 * @param MvcEvent $e
+	 */
+	
 	public function registerViewStrategy(MvcEvent $e)
 	{
-		$app = $e->getTarget();
-		$locator = $app->getLocator();
+		$application = $e->getTarget();
+		$manager = $application->getServiceManager();
 
-		$strategy = $locator->get('Application\View\Strategy');
-		$view = $locator->get('Zend\View\View');
+		$strategy = $manager->get('Application\View\Strategy');
+		$view = $manager->get('Zend\View\View');
 
 		$view->events()->attach( $strategy, 100 );
 	}	

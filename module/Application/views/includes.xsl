@@ -242,6 +242,7 @@
 	
 	<xsl:template name="surround_meta">
 			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+			<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
 			<xsl:copy-of select="$text_extra_meta_tags" />
 	</xsl:template>
 	
@@ -259,11 +260,6 @@
 						<xsl:call-template name="header_div" />
 					</xsl:otherwise>
 				</xsl:choose>
-				<div id="breadcrumb">
-					<div class="trail">
-						<xsl:call-template name="breadcrumb" />
-					</div>
-				</div>
 			</div>
 	</xsl:template>
 	
@@ -275,6 +271,9 @@
 		<xsl:param name="sidebar" />
 	
 			<div id="bd" data-role="content">
+			
+				<xsl:call-template name="surround_bd_top" />
+			
 				<div id="yui-main">
 					<div class="yui-b">
 						<xsl:if test="string(//session/flash_message)">
@@ -293,9 +292,47 @@
 	</xsl:template>
 	
 	<!-- 
+		TEMPLATE: surround bd top
+		breadcrumbs and account links
+	-->
+	
+	<xsl:template name="surround_bd_top">
+		
+		<div id="bd-top">
+		
+			<div class="yui-gc">
+				<div class="yui-u first">	
+	
+					<!-- breadcrumbs -->
+	
+					<div class="trail">
+						<xsl:call-template name="breadcrumb" />
+					</div>
+	
+				</div>
+				
+				<div class="yui-u">
+				
+					<!-- my account -->
+				
+					<div class="account">
+						<xsl:call-template name="account_options" />
+					</div>
+					
+				</div>
+	
+			</div>
+			
+		</div>
+	
+	</xsl:template>
+	
+	
+	<!-- 
 		TEMPLATE: surround ft
 		page footer
 	-->
+	
 	<xsl:template name="surround_ft">
 			<div id="ft">
 				<xsl:choose>
@@ -346,15 +383,18 @@
 			<xsl:when test="$is_mobile = '1'">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1" /> 
+				
 				<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
 				<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-				<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
-			
+				<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>					
+
 				<!-- @todo: remove this when we square away css on production systems -->
-				
+					
 				<style type="text/css">
-				.results-info, .sidebar, #breadcrumb, #bd h1, #tabnav { display: none; }
+					.results-info, .sidebar, #bd-top, #bd h1, #tabnav, .save-record-action { display: none; }
 				</style>
+				
+				<link href="css/local-mobile.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
 
 			</xsl:when>
 			<xsl:otherwise>
@@ -455,44 +495,64 @@
 	
 	<!--
 		TEMPLATE: MY ACCOUNT SIDEBAR
-		links to login/out, my saved records, and other personalization features
+		sidebar account block
 	-->
 	
 	<xsl:template name="account_sidebar">
 		<div id="account" class="box">
 			<h2><xsl:copy-of select="$text_header_myaccount" /></h2>
-			<ul>
-				<li id="login-option">
-					<xsl:choose>
-						<xsl:when test="//request/session/role and //request/session/role = 'named'">
-							<a id="logout">
-							<xsl:attribute name="href"><xsl:value-of select="//navbar/logout_link" /></xsl:attribute>
-								<xsl:copy-of select="$text_header_logout" />
-							</a>
-						</xsl:when>
-						<xsl:otherwise>
-							<a id="login">
-							<xsl:attribute name="href"><xsl:value-of select="//navbar/login_link" /></xsl:attribute>
-								<xsl:copy-of select="$text_header_login" />
-							</a>
-						</xsl:otherwise>
-					</xsl:choose>
-				</li>
-			
-				<li id="my-saved-records" class="sidebar-folder">
-					<xsl:call-template name="img_save_record">
-						<xsl:with-param name="id">folder</xsl:with-param>
-						<xsl:with-param name="test" select="//navbar/element[@id='saved_records']/@numSessionSavedRecords &gt; 0" />
-					</xsl:call-template>
-					<xsl:text> </xsl:text>
-					<a>
-					<xsl:attribute name="href"><xsl:value-of select="//navbar/my_account_link" /></xsl:attribute>
-						<xsl:copy-of select="$text_header_savedrecords" />
-					</a>
-				</li>
-				
-			</ul>
+			<xsl:call-template name="account_options" />			
 		</div>
+	</xsl:template>
+
+	<!--
+		TEMPLATE: ACCOUNT OPTIONS
+		links to login/out, my saved records, and other personalization features
+	-->	
+	
+	<xsl:template name="account_options">
+	
+		<ul>
+			<li id="login-option">
+				<xsl:choose>
+					<xsl:when test="//request/session/role and //request/session/role = 'named'">
+					
+						<xsl:call-template name="img_logout" />
+						<xsl:text> </xsl:text>
+					
+						<a id="logout">
+						<xsl:attribute name="href"><xsl:value-of select="//navbar/logout_link" /></xsl:attribute>
+							<xsl:copy-of select="$text_header_logout" />
+						</a>
+						
+					</xsl:when>
+					<xsl:otherwise>
+					
+						<xsl:call-template name="img_login" />
+						<xsl:text> </xsl:text>			
+
+						<a id="login">
+						<xsl:attribute name="href"><xsl:value-of select="//navbar/login_link" /></xsl:attribute>
+							<xsl:copy-of select="$text_header_login" />
+						</a>
+					</xsl:otherwise>
+				</xsl:choose>
+			</li>
+		
+			<li id="my-saved-records" class="sidebar-folder">
+				<xsl:call-template name="img_save_record">
+					<xsl:with-param name="id">folder</xsl:with-param>
+					<xsl:with-param name="test" select="count(//session/resultssaved) &gt; 0" />
+				</xsl:call-template>
+				<xsl:text> </xsl:text>
+				<a>
+				<xsl:attribute name="href"><xsl:value-of select="//navbar/my_account_link" /></xsl:attribute>
+					<xsl:copy-of select="$text_header_savedrecords" />
+				</a>
+			</li>
+			
+		</ul>	
+	
 	</xsl:template>
 
 	<!--
@@ -580,7 +640,7 @@
 	<xsl:param name="class" />
 	<xsl:param name="alt" />
 	<xsl:param name="test" />
-	<img id="{$id}" name="{$id}" width="17" height="15" alt="{$alt}" border="0" class="{$class}">
+	<img id="{$id}" name="{$id}" alt="{$alt}" border="0" class="{$class}">
 		<xsl:attribute name="src">
 			<xsl:choose> 
 				<xsl:when test="$test">images/folder_on.gif</xsl:when>
@@ -609,6 +669,20 @@
 	<xsl:param name="title" />
 	<xsl:param name="class" />
 	<img src="images/book.gif" alt="{$alt}" title="{$title}" class="{$class}" />
+</xsl:template>
+
+<xsl:template name="img_login">
+	<xsl:param name="alt" />
+	<xsl:param name="title" />
+	<xsl:param name="class" />
+	<img src="images/famfamfam/user.png" alt="{$alt}" title="{$title}" class="{$class}" />
+</xsl:template>
+
+<xsl:template name="img_logout">
+	<xsl:param name="alt" />
+	<xsl:param name="title" />
+	<xsl:param name="class" />
+	<img src="images/famfamfam/user_delete.png" alt="{$alt}" title="{$title}" class="{$class}" />
 </xsl:template>
 
 <xsl:template name="img_results_hint_remove_limit">
