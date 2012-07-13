@@ -55,8 +55,6 @@ class ConfigTargets extends Targets
                 $tgt->position = $i;
                 $this->targets[$tgt->pz2_key] = $tgt; 
             }
-    }
-
         }
     }
 
