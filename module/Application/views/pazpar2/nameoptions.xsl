@@ -51,20 +51,10 @@
             <input type="button" id="clear-button" name="none" value="Clear all"/><br/>
             <input type="submit" id="change-targets" name="changetargets" value="Save changes"/>
         </div>
-        <div id="list-column" style="float:left">
-        <ul>
-                <xsl:for-each select="//all-targets/target">
-                <xsl:variable name="key"><xsl:value-of select="@target_id"/></xsl:variable>
-                <li>
-                        <input type="checkbox" name="target[]" id="{$key}" value="{$key}" class="subjectDatabaseCheckbox" >
-                                <xsl:if test="boolean(//pazpar2options/user-options/targets/target = $key)">
-                            <xsl:attribute name="checked">checked</xsl:attribute>
-                        </xsl:if>
-                    </input>
-                    <span class="subjectDatabaseTitle"> <a href="{library_url}" title="Go directly to {display_name}"><xsl:value-of select="display_name" /></a></span> <span class="subjectDatabaseInfo"><a title="More information about {display_name}" href="/pazpar2/library?target={@target_id}"> <img src="images/info.gif" alt="More information about {display_name}" /></a></span>
-                </li>
-            </xsl:for-each>
-           </ul>
+	<div id="list-column" style="float:left">
+		<xsl:call-template name="loop_columns">
+			<xsl:with-param name="num_columns">2</xsl:with-param>
+		</xsl:call-template>
        </div>
     </form>
 </xsl:template>
@@ -84,29 +74,32 @@
         <xsl:param name="num_columns"/>
         <xsl:param name="iteration_value">1</xsl:param>
         
-        <xsl:variable name="total" select="count(//target)" />
-        <xsl:variable name="numRows" select="ceiling($total div $num_columns)"/>
+	<xsl:variable name="total" select="count(//all-targets/target)" />
+	<xsl:variable name="numRows" select="ceiling($total div $num_columns)"/>
         <xsl:if test="$iteration_value &lt;= $num_columns">
-                <div>
+                <div style="float: left">
                 <xsl:attribute name="class">
                         <xsl:text>yui-u</xsl:text><xsl:if test="$iteration_value = 1"><xsl:text> first</xsl:text></xsl:if>
-                </xsl:attribute>
+		</xsl:attribute>
+		<ul>
+			<xsl:for-each select="//all-targets/target[@position &gt; ($numRows * ($iteration_value -1)) and @position &lt;= ( $numRows * $iteration_value )]">
+                <xsl:variable name="key"><xsl:value-of select="@target_id"/></xsl:variable>
+                <li>
+                        <input type="checkbox" name="target[]" id="{$key}" value="{$key}" class="subjectDatabaseCheckbox" >
+                                <xsl:if test="boolean(//pazpar2options/user-options/targets/target = $key)">
+                            <xsl:attribute name="checked">checked</xsl:attribute>
+                        </xsl:if>
+                    </input>
+                    <span class="subjectDatabaseTitle"> <a href="{library_url}" title="Go directly to {display_name}"><xsl:value-of select="display_name" /></a></span> <span class="subjectDatabaseInfo"><a title="More information about {display_name}" href="/pazpar2/library?target={@target_id}"> <img src="images/info.gif" alt="More information about {display_name}" /></a></span>
+                </li>
+            </xsl:for-each>
                         
-                        <ul>
-                        <xsl:for-each select="region[@position &gt; ($numRows * ($iteration_value -1)) and 
-                                @position &lt;= ( $numRows * $iteration_value )]">
-                                
-                                <xsl:variable name="normalized" select="normalized" />
-                                <li><a href="{url}"><xsl:value-of select="name" /></a></li>
-                        </xsl:for-each>
-                        </ul>
-                </div>
-                
+    </ul>
+	</div>        
                 <xsl:call-template name="loop_columns">
                         <xsl:with-param name="num_columns" select="$num_columns"/>
                         <xsl:with-param name="iteration_value"  select="$iteration_value+1"/>
                 </xsl:call-template>
-        
         </xsl:if>
         
 </xsl:template>

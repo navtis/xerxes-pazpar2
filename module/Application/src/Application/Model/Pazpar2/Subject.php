@@ -24,6 +24,7 @@ class Subject extends DataValue
 {
     public $subject_id; 
     public $name;
+    public $url;
     private $xml; // simplexml
     private $vars;
     private $position;
@@ -40,6 +41,7 @@ class Subject extends DataValue
 	    $this->vars = $arr; // keep for use later
 	    $this->subject_id = $this->vars['id'];
 	    $this->name = $this->vars['name'];
+	    $this->url = $this->vars['url'];
 	    parent::load($arr);
 	}
 	
@@ -64,6 +66,7 @@ class Subject extends DataValue
 	    $xml->loadXML("<subject />");
 	    $xml->documentElement->setAttribute("subject_id", $this->subject_id);
 	    $xml->documentElement->setAttribute("position", $this->position);
+	    $xml->documentElement->setAttribute("url", $this->url);
 	    if (isset( $this->textValue ) )
 	    {
             // check checkbox

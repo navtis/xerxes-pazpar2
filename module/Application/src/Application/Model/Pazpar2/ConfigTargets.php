@@ -34,6 +34,7 @@ class ConfigTargets extends Targets
 
         if ( $config != null )
         { 
+            $tgtArray = array();
             foreach ( $config->target as $target_data )
             { 
                 $data = array();
@@ -44,8 +45,17 @@ class ConfigTargets extends Targets
                 }
                 $target = new Target();
                 $target->load($data);
-                $this->targets[$target->pz2_key] = $target;
+                $tgtArray[] = $target;
             }
+            usort( $tgtArray, array($this, 'alphasort') );
+
+            for( $i=0; $i < count($tgtArray); $i++)
+            {
+                $tgt = $tgtArray[$i];
+                $tgt->position = $i;
+                $this->targets[$tgt->pz2_key] = $tgt; 
+            }
+    }
 
         }
     }
@@ -60,11 +70,10 @@ class ConfigTargets extends Targets
      * Get one or a set of targets 
      *
      * @param mixed $keys               [optional] null returns all targets, array returns a list of targets by id, string id returns single id
-     * @param boolean $alpha            [optional] specifies alphabetic order
      * @return array                    array of Target objects
      */
         
-    public function getTargets($keys = null, $alpha = null)
+    public function getTargets($keys = null)
     {
         $arrTargets = array ( );
         if ( $keys == null )
@@ -89,10 +98,8 @@ class ConfigTargets extends Targets
             }
         }               
         
-        if ( $alpha != null )
-        {
-            usort( $arrTargets, 'alphasort' );
-        }
+        usort( $arrTargets, 'alphasort' );
+        
         return $arrTargets;
     }
         

@@ -86,11 +86,10 @@ class ConfigSubjects extends Subjects
      * Get one or a set of subjects 
      * 
      * @param mixed $keys               [optional] null returns all subjects, array returns a list of subjects by id, string id returns single id
-     * @param boolean $alpha            [optional] specifies alphabetic order
      * @return array                    array of Subject objects
      */
         
-    public function getSubjects($keys = null, $alpha = null)
+    public function getSubjects($keys = null)
     {
         $arrSubjects = array ( );
         if ( $keys == null )
@@ -115,10 +114,6 @@ class ConfigSubjects extends Subjects
             }
         }               
         
-        if ( $alpha != null )
-        {
-            usort( $arrSubjects, 'alphasort' );
-        }
         return $arrSubjects;
     }
 
@@ -127,10 +122,9 @@ class ConfigSubjects extends Subjects
      * by its pazpar2 key (from the pazpar2 configuration files 
      *
      * @param string $pz2_key   Identifier for a pazpar2 z39.50 target
-     * @param boolean $alpha    Optionally sort results alphabetically
      * @returns array of Subjects
      */
-    public function getSubjectsByTarget($pz2_key, $alpha = null)
+    public function getSubjectsByTarget($pz2_key)
     {
         $arrSubjects = array ( );
         $ss = $this->targets_to_subjects[$pz2_key];
@@ -141,20 +135,15 @@ class ConfigSubjects extends Subjects
                 $arrSubjects[] = $subject;
             }
         }
-        if ( $alpha != null )
-        {
-            usort( $arrSubjects, 'alphasort' );
-        }
         return $arrSubjects;
     }
 
     /**
      * Get all the pazpar2 targets which cover a particular subject
      * @param string/array $subject_ids     Single subject_id or array of subject_ids
-     * @param boolean $alpha    Optionally sort results alphabetically
      * @returns Targets object  
      */
-    public function getTargetsBySubject($subject_ids, $alpha = null)
+    public function getTargetsBySubject($subject_ids)
     {
         $ss = array();
         if (! is_array($subject_ids) )

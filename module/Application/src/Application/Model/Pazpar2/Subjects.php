@@ -56,13 +56,12 @@ class Subjects
      * Get one or a set of subjects: must be implemented by subclasses 
      *
      * @param mixed $key                [optional] null returns all subjects, array returns a list of subjects by id, string id returns single id
-     * @param boolean $alpha            [optional] alphabetic sort results 
      * @return array                    array of Subject objects
      */
         
-    public function getSubjects($key = null, $alpha = null)
+    public function getSubjects($key = null)
     {
-        return $this->manager->getSubjects($key, $alpha);
+        return $this->manager->getSubjects($key);
     }
 
     public function getSubjectKeys()
@@ -79,12 +78,11 @@ class Subjects
     /**
      * Get all the pazpar2 targets which cover a particular subject
      * @param string/array $subject_ids     Single subject_id or array of subject_ids
-     * @param boolean $alpha    Optionally sort results alphabetically
      * @returns Targets object  
      */
-    public function getTargetsBySubject($subject_ids, $alpha = null)
+    public function getTargetsBySubject($subject_ids)
     {
-        return $this->manager->getTargetsBySubject($subject_ids, $alpha);
+        return $this->manager->getTargetsBySubject($subject_ids);
     }
 
     /**
@@ -92,12 +90,11 @@ class Subjects
      * by its pazpar2 key (from the pazpar2 configuration files 
      *
      * @param string $pz2_key   Identifier for a pazpar2 z39.50 target
-     * @param boolean $alpha    Optionally sort results alphabetically
      * @returns array of Subjects
      */
-    public function getSubjectsByTarget($target_ids, $alpha = null)
+    public function getSubjectsByTarget($target_ids)
     {
-        return $this->manager->getTargetsBySubject($target_ids, $alpha);
+        return $this->manager->getTargetsBySubject($target_ids);
     }
 
 }

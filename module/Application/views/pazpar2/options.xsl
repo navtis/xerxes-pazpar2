@@ -41,6 +41,36 @@
     </xsl:call-template>
 </xsl:template>
 
+<!-- override ../includes to give full-width page contents -->
+	<!-- 
+		TEMPLATE: surround bd
+		page body - main content
+	-->
+	<xsl:template name="surround_bd">
+		<xsl:param name="sidebar" />
+	
+			<div id="bd" data-role="content">
+			
+				<xsl:call-template name="surround_bd_top" />
+			
+				<div id="yui-main">
+					<div class="yui-u">
+						<xsl:if test="string(//session/flash_message)">
+							<xsl:call-template name="message_display"/>
+						</xsl:if>
+						
+						<xsl:call-template name="main" />
+					</div>
+				</div>
+				
+				<xsl:if test="$sidebar != 'none' and $is_mobile != '1'">
+					<xsl:call-template name="sidebar_wrapper" />
+				</xsl:if>
+	
+			</div>
+	</xsl:template>
+	
+
 <!-- override ../includes to add own js -->
 <xsl:template name="javascript_include"> 
     <xsl:call-template name="jslabels" /> 

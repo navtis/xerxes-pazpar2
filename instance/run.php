@@ -16,6 +16,7 @@ if (!include_once("$path/vendor/autoload.php")) {
 // Get application stack configuration
 $configuration = include "$path/config/application.config.php";
 
+
 // Setup service manager
 $serviceManager = new ServiceManager(new ServiceManagerConfiguration($configuration['service_manager']));
 $serviceManager->setService('ApplicationConfiguration', $configuration);
