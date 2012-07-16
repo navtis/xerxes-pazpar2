@@ -34,9 +34,7 @@ $(document).ready(function(){
             {
                 // no point in pinging if comms down
                 clearInterval(pinger);
-                alert('Session timed out - about to restart');
-                var url = '/';
-                window.location = url;
+		// stay on current page
             }
         }) 
     }, 40000); // 40 seconds default between pings 

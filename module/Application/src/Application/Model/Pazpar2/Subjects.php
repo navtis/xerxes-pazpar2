@@ -64,6 +64,18 @@ class Subjects
         return $this->manager->getSubjects($key);
     }
 
+    /**
+     * Get all subjects for a library: must be implemented by subclasses 
+     *
+     * @param string pz2_key            Identifier for institution to look in
+     * @param string $key               Identifier for library within institution
+     * @return array                    array of Subject objects
+     */
+    public function getSubjectsByLibrary($pz2_key, $key)
+    {
+        return $this->manager->getSubjectsByLibrary($pz2_key, $key);
+    }
+
     public function getSubjectKeys()
     {
         $keys = array();

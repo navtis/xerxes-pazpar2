@@ -5,6 +5,7 @@ namespace Application\Controller;
 use Application\Model\Pazpar2\Engine,
     Application\Model\Pazpar2\Targets,
     Application\Model\Pazpar2\Subjects,
+    Application\Model\Pazpar2\Libraries,
     Application\Model\Pazpar2\UserOptions,
     Application\Model\DataMap\SavedRecords,
     Application\View\Helper\Pazpar2 as SearchHelper,
@@ -53,6 +54,14 @@ class Pazpar2Controller extends SearchController
      */
     public function libraryAction()
     {
+
+        if ( ($target = $this->request->getParam('target') ) != null )
+        {
+            $institution = (new Targets())->getIndividualTargets($target);
+            $this->data['institution'] = $institution;
+            $libs = new Libraries( $target );
+            $this->data['libraries'] = $libs;
+        }
         return($this->data);
     }
 

@@ -82,7 +82,7 @@ class Targets
         }
         else
         {
-            return $this->manager->getTargets($key, $alpha);
+            return $this->manager->getIndividualTargets($key);
         }
     }
 

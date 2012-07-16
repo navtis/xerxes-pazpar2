@@ -337,15 +337,24 @@
 			<table class="holdings-table" width="100%">
 				<xsl:if test="target_title">
                     <tr>
+			<th colspan="1">Institution: <span style="font-weight: bold"><xsl:value-of select="target_title"/></span></th>
                         <xsl:choose>
-                            <xsl:when test="links/link[@type='original']">
-					            <th colspan="1">Institution: <span style="font-weight: bold"><xsl:value-of select="target_title"/></span></th>
-					            <th colspan="4"><a href="{links/link/url}" target="_blank"><xsl:value-of select="$text_record_linkback"/></a></th>
+				<xsl:when test="//config/libraryclass">
+					<th colspan="1"><a href="pazpar2/library?target={target_name}">Library information</a></th>
                             </xsl:when>
-                            <xsl:otherwise>
-					            <th colspan="5">Institution: <span style="font-weight: bold"><xsl:value-of select="target_title"/></span></th>
+			    <xsl:otherwise>
+					<th colspan="1"></th>
                             </xsl:otherwise>
-                        </xsl:choose>
+		    </xsl:choose>
+		    <xsl:choose> 
+			    <xsl:when test="links/link[@type='original']"> 
+				    <th colspan="1"><a href="{links/link/url}" target="_blank"><xsl:value-of select="$text_record_linkback"/></a></th> 
+			    </xsl:when> 
+			    <xsl:otherwise>
+				   <th colspan="1"></th>
+			</xsl:otherwise>
+		</xsl:choose>
+		<th colspan="2"></th>
                     </tr>
 				</xsl:if>
 			<tr>
@@ -365,7 +374,7 @@
 					        <td><xsl:value-of select="$text_record_no_holdings" /></td>
                         </xsl:when>
                         <xsl:when test="$loc='linkback'">
-                            <td> <xsl:value-of select="$text_record_availability"/><xsl:text> </xsl:text><a href="{../../links/link/url}" target="_blank"><xsl:value-of select="../../target_title"/><xsl:text> </xsl:text><xsl:value-of select="$text_record_catalogue_entry"/></a> </td>
+                            <td> <xsl:value-of select="$text_record_availability"/><xsl:text> </xsl:text><a href="{../../links/link/url}" target="_blank"><xsl:value-of select="../../target_title"/><xsl:text> catalogue </xsl:text><xsl:value-of select="$text_record_catalogue_entry"/></a> </td>
                         </xsl:when>
                         <xsl:otherwise>
 					        <td><xsl:value-of select="location" /></td>
