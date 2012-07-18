@@ -47,24 +47,13 @@
     <form id="target-form" action="" method="post">
         <input type="hidden" name="selectedby" value="subjects"/>
         <div id="button-column" style="float:left">
-            <input type="button" id="all-button" name="all" value="Select all"/><br/>
             <input type="button" id="clear-button" name="none" value="Clear all"/><br/>
             <input type="submit" id="change-targets" name="changetargets" value="Save changes"/>
         </div>
         <div id="list-column" style="float:left">
-        <ul>
-		<xsl:for-each select="//all-subjects/subject">
-                <xsl:variable name="key"><xsl:value-of select="@subject_id"/></xsl:variable>
-                <li>
-                    <input type="checkbox" name="subject[]" id="{@subject_id}" value="{@subject_id}" class="subjectDatabaseCheckbox" >
-                        <xsl:if test="boolean(//pazpar2options/user-options/subjects/subject = $key)">
-                            <xsl:attribute name="checked">checked</xsl:attribute>
-                        </xsl:if>
-                    </input>
-		    <span class="subjectDatabaseTitle"> <xsl:value-of select="name" /></span> <span class="subjectDatabaseInfo"><a title="More information about this subject heading" href="/pazpar2/subject?target={@subject_id}"> <img src="images/info.gif" alt="More information about this subject heading" /></a></span>
-                </li>
-            </xsl:for-each>
-           </ul>
+		<xsl:call-template name="loop_columns">
+			<xsl:with-param name="num_columns">2</xsl:with-param>
+		</xsl:call-template>
        </div>
     </form>
 </xsl:template>
@@ -84,20 +73,27 @@
         <xsl:param name="num_columns"/>
         <xsl:param name="iteration_value">1</xsl:param>
         
-        <xsl:variable name="total" select="count(//target)" />
+	<xsl:variable name="total" select="count(//all-subjects/subject)" />
         <xsl:variable name="numRows" select="ceiling($total div $num_columns)"/>
         <xsl:if test="$iteration_value &lt;= $num_columns">
-                <div>
+                <div style="float:left">
                 <xsl:attribute name="class">
                         <xsl:text>yui-u</xsl:text><xsl:if test="$iteration_value = 1"><xsl:text> first</xsl:text></xsl:if>
                 </xsl:attribute>
                         
                         <ul>
-                        <xsl:for-each select="region[@position &gt; ($numRows * ($iteration_value -1)) and 
-                                @position &lt;= ( $numRows * $iteration_value )]">
+				<xsl:for-each select="//all-subjects/subject[@position &gt; ($numRows * ($iteration_value -1)) and @position &lt;= ( $numRows * $iteration_value )]">
+                <xsl:variable name="key"><xsl:value-of select="@subject_id"/></xsl:variable>
+                <li>
+                    <input type="checkbox" name="subject[]" id="{@subject_id}" value="{@subject_id}" class="subjectDatabaseCheckbox" >
+                        <xsl:if test="boolean(//pazpar2options/user-options/subjects/subject = $key)">
+                            <xsl:attribute name="checked">checked</xsl:attribute>
+                        </xsl:if>
+                    </input>
+		    <span class="subjectDatabaseTitle"> <xsl:value-of select="name" /></span> 
+		    <xsl:if test="string(@url)"><span class="subjectDatabaseInfo"><a title="More information about this subject heading" href="{@url}" target="_blank"> <img src="images/info.gif" alt="More information about this subject heading" /></a></span></xsl:if>
+                </li>
                                 
-                                <xsl:variable name="normalized" select="normalized" />
-                                <li><a href="{url}"><xsl:value-of select="name" /></a></li>
                         </xsl:for-each>
                         </ul>
                 </div>
