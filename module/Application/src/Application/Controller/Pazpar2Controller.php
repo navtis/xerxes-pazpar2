@@ -50,14 +50,14 @@ class Pazpar2Controller extends SearchController
     }
 
     /* Informational page about a single institution and its constituent libraries.
-     * FIXME still to be written
      */
     public function libraryAction()
     {
 
         if ( ($target = $this->request->getParam('target') ) != null )
         {
-            $institution = (new Targets())->getIndividualTargets($target);
+            $t = new Targets();
+            $institution = $t->getIndividualTargets($target);
             $this->data['institution'] = $institution;
             $libs = new Libraries( $target );
             $this->data['libraries'] = $libs;
