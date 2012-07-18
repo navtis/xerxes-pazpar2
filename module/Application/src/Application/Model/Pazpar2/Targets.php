@@ -28,7 +28,7 @@ class Targets
     {
 	// the 'real' class is given by the configuration file
 	$config = Config::getInstance();
-        $targetClass = $config->getConfig("targetclass") . 'Targets';
+        $targetClass = $config->getConfig("datasource") . 'Targets';
         $targetClass = 'Application\Model\Pazpar2\\' .  $targetClass;
 	$this->manager = new $targetClass();
 

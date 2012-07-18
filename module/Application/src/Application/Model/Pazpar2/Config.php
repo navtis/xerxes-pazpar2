@@ -115,4 +115,10 @@ class Config extends Search\Config
         }
         return $group;
     }
+
+    // let Config* classes access xml
+    public function getXml()
+    {
+        return $this->xml;
+    }
 }

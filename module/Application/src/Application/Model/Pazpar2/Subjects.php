@@ -28,10 +28,9 @@ class Subjects
     {
         // the 'real' class is given by the configuration file
         $config = Config::getInstance();
-        $subjectClass = $config->getConfig("subjectclass") . 'Subjects';
+        $subjectClass = $config->getConfig("datasource") . 'Subjects';
         $subjectClass = 'Application\Model\Pazpar2\\' .  $subjectClass;
         $this->manager = new $subjectClass();
-
         if ( $subjectnames != null )
         {
             $this->subjectnames = $subjectnames;

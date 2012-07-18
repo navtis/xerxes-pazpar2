@@ -44,28 +44,32 @@
         <!-- allowed upper limit on records_per_page -->
         <config name="max_records_per_page">100</config>
 
-        <!-- Prefix for the name of the class which extends Pazpar2/Targets. Targets
-             may be in this config file, in a database or from a remote API (search25) -->
-        <config name="targetclass" pass="true">Config</config>
-        <!-- Prefix for the name of the class which extends Pazpar2/Subjects. Subjects
-             may be in this config file, in a database or from a remote API (search25) -->
-        <config name="subjectclass" pass="true">Config</config>
+        <!-- Prefix for the name of the class which extends Pazpar2/Targets
+             and related classes. Data may come from Config file, external
+             API, or Database. Current working values are Config and Api -->
+        <config name="datasource" pass="true">Config</config> 
+        <!-- Only required if Api is being used as datasource -->
+        <config name="apiurl">http://xerxes.inform25.ac.uk:5225</config>
 
         <!-- Target details for(use with pazpar2 conf files in data/pazpar2) -->
         <!-- Used by ConfigTargets -->
         <config name="targets" xml="true" pass="false">
             <target display_name="OAIster" short_name="OAIster" pz2_key="oai" z3950_location="opencontent/oai" library_url="http://www.oaister.org/" type="online" linkback_url="">
-                <subject id="1">Science</subject>
+                <subject id="1" url="http://id.loc.gov/authorities/subjects/sh85118553.html">Science</subject>
+                <library type="virtual" library_id="1" full_name="OAIster">OAIster is a union catalog of millions of records representing open access resources that was built by the University of Michigan harvesting from open access collections worldwide using the Open Archives Initiative Protocol for Metadata Harvesting (OAI-PMH), and is now managed by OCLC. </library>
             </target>
             <target display_name="Open Content Alliance" short_name="OCA" pz2_key="oca" z3950_location="opencontent/oca" library_url="http://www.opencontentalliance.org" type="online"  linkback_url="">
-                <subject id="2">Literature</subject>
+                <subject id="2" url="http://id.loc.gov/authorities/subjects/sh85077507.html">Literature</subject>
+                <library type="virtual" library_id="1" full_name="Open Content Alliance">The Open Content Alliance (OCA) is a collaborative effort of a group of cultural, technology, nonprofit, and governmental organizations from around the world that helps build a permanent archive of multilingual digitized text and multimedia material. An archive of contributed material is available on the Internet Archive website and through Yahoo! and other search engines and sites.</library>
             </target>
             <target display_name="Project Gutenberg" short_name="Gutenberg" pz2_key="gtbg" z3950_location="opencontent/gtbg" library_url="http://www.gutenberg.org/" type="online"  linkback_url="">
-                <subject id="2">Literature</subject>
+                <subject id="2" url="http://id.loc.gov/authorities/subjects/sh85077507.html">Literature</subject>
+                <library type="virtual" library_id="1" full_name="Project Gutenberg" >Project Gutenberg is the first and largest single collection of free electronic books, or eBooks. Michael Hart, founder of Project Gutenberg, invented eBooks in 1971 and continues to inspire the creation of eBooks and related technologies today.</library>
             </target>
             <target display_name="Library of Congress" short_name="Congress" pz2_key="loc" z3950_location="library/loc" library_url="http://www.loc.gov" type="library"  linkback_url="" >
-                <subject id="2">Literature</subject>
-                <subject id="1">Science</subject>
+                <subject id="2" url="http://id.loc.gov/authorities/subjects/sh85077507.html">Literature</subject>
+                <subject id="1" url="http://id.loc.gov/authorities/subjects/sh85118553.html">Science</subject>
+                <library type="physical" library_id="1" full_name="Library of Congress">The Library of Congress. What can you say?</library>
             </target>
             <!-- offline? 
                 <target display_name="University of California" short_name="UCLA" pz2_key="ucla" z3950_location="library/ucla" library_url="http://www.library.ucla.edu/" type="library" linkback_url="" >
@@ -74,12 +78,15 @@
             </target>
             -->
                 <target display_name="California State Library" short_name="Cal State" pz2_key="cal" z3950_location="library/cal" library_url="http://www.library.ca.gov/" type="library" linkback_url="" >
-                <subject id="2">Literature</subject>
-                <subject id="1">Science</subject>
+                    <subject id="2" url="http://id.loc.gov/authorities/subjects/sh85077507.html">Literature</subject>
+                    <subject id="1" url="http://id.loc.gov/authorities/subjects/sh85118553.html">Science</subject>
+                <library type="physical" library_id="1" full_name="California State Library">One of many many branches</library>
             </target>
-                <target display_name="Oxford University" short_name="Oxford" pz2_key="ox" z3950_location="library/ox" library_url="http://www.ox.ac.uk/research/libraries/index.html" type="library" linkback_url="" >
-                <subject id="2">Literature</subject>
-                <subject id="1">Science</subject>
+            <target display_name="Oxford University" short_name="Oxford" pz2_key="ox" z3950_location="library/ox" library_url="http://www.ox.ac.uk/research/libraries/index.html" type="library" linkback_url="" >
+                <subject id="2" url="http://id.loc.gov/authorities/subjects/sh85077507.html">Literature</subject>
+                <subject id="1" url="http://id.loc.gov/authorities/subjects/sh85118553.html">Science</subject>
+                <library type="physical" library_id="1" visitor_information_url="http://www.bodleian.ox.ac.uk/bodley" full_name="Bodleian Library" address="New Library, Parks Road, Oxford" postcode="OX1 3BG" latitude="51.7540" longitude="-1.2551" phone="01865 277162" email="reader.services@bodleian.ox.ac.uk">This is the University's main research library and is the second largest in the UK after the British Library. It has 120 miles of occupied shelving, 29 reading rooms and 2,490 places for readers.</library>
+                <library type="physical" library_id="2" full_name="Sackler Library" address="Sackler Library, 1 St John Street, Oxford" postcode="OX1 2LG" latitude="51.7544" longitude="-1.2611" visitor_information_url="http://www.ouls.ox.ac.uk/sackler/">This library supersedes the Ashmolean, Classics Lending Library, and the library of the History of Art</library> 
             </target>
         </config>
 

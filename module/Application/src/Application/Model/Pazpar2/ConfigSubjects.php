@@ -41,6 +41,7 @@ class ConfigSubjects extends Subjects
         if ( $config != null )
         { 
             $subj_assoc = array();
+            $subj_urls = array();
             $key = 'pz2_key';
             foreach ( $config->target as $target_data )
             { 
@@ -54,23 +55,27 @@ class ConfigSubjects extends Subjects
                 $id = 'id';
                 foreach($subjects as $s)
                 {
-                    $subj = (string)$s;
-                    $subj_id = (string)$s->attributes()->$id;
-                    $subj_assoc[$subj] = $subj_id;
-                    if (! array_key_exists( $subj_id, $this->subjects_to_targets ) )
+                    if ($s->getName() == 'subject')
                     {
-                        $this->subjects_to_targets[$subj_id] = array();
+                        $subj = (string)$s;
+                        $subj_id = (string)$s->attributes()->$id;
+                        $subj_url = (string)$s->attributes()->url;
+                        $subj_urls[$subj]= $subj_url;
+                        $subj_assoc[$subj] = $subj_id;
+                        if (! array_key_exists( $subj_id, $this->subjects_to_targets ) )
+                        {
+                            $this->subjects_to_targets[$subj_id] = array();
+                        }
+                        $this->targets_to_subjects[$t][] = $subj_id;
+                        $this->subjects_to_targets[$subj_id][] = $t;
                     }
-                    $this->targets_to_subjects[$t][] = $subj_id;
-                    $this->subjects_to_targets[$subj_id][] = $t;
                 }
-            }
+            }   
             $this->subjectnames = array_keys( $subj_assoc );
-            sort( $this->subjectnames );
             foreach( $this->subjectnames as $sn)
             {
                 $subject = new Subject();
-                $subject->load(array('name' => $sn, 'id' => $subj_assoc[$sn])); // useful when has more attributes!
+                $subject->load(array('name' => $sn, 'id' => $subj_assoc[$sn], 'position' => $subj_assoc[$sn], 'url' => $subj_urls[$sn])); 
                 $this->subjects[] = $subject;
             }
         }
@@ -115,6 +120,13 @@ class ConfigSubjects extends Subjects
         }               
         
         return $arrSubjects;
+    }
+
+    // just a wrapper for now - Config returns no subjects for individual
+    // libraries
+    public function getSubjectsByLibrary($pz2_key, $library_id)
+    {
+        return $this->getSubjectsByTarget($pz2_key);    
     }
 
     /**

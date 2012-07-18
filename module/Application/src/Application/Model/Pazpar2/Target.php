@@ -48,7 +48,11 @@ class Target extends DataValue
 	    $this->library_url = $this->vars['library_url'];
 	    $this->linkback_url = $this->vars['linkback_url'];
 	    $this->title_short = $this->vars['short_name'];
-	    $this->title_long = $this->vars['display_name'];
+            $this->title_long = $this->vars['display_name'];
+            if ( isset($this->vars['sort_name']) )
+            {
+                $this->sort_name = $this->vars['sort_name'];
+            }
 	    parent::load($arr);
 	}
 

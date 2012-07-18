@@ -42,6 +42,7 @@ class Subject extends DataValue
 	    $this->subject_id = $this->vars['id'];
 	    $this->name = $this->vars['name'];
 	    $this->url = $this->vars['url'];
+	    $this->position = $this->vars['position'];
 	    parent::load($arr);
 	}
 	

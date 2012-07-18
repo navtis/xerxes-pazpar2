@@ -338,14 +338,7 @@
 				<xsl:if test="target_title">
                     <tr>
 			<th colspan="1">Institution: <span style="font-weight: bold"><xsl:value-of select="target_title"/></span></th>
-                        <xsl:choose>
-				<xsl:when test="//config/libraryclass">
-					<th colspan="1"><a href="pazpar2/library?target={target_name}">Library information</a></th>
-                            </xsl:when>
-			    <xsl:otherwise>
-					<th colspan="1"></th>
-                            </xsl:otherwise>
-		    </xsl:choose>
+			<th colspan="1"><a href="pazpar2/library?target={target_name}">Library information</a></th>
 		    <xsl:choose> 
 			    <xsl:when test="links/link[@type='original']"> 
 				    <th colspan="1"><a href="{links/link/url}" target="_blank"><xsl:value-of select="$text_record_linkback"/></a></th> 
