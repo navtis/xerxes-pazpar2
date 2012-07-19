@@ -270,9 +270,8 @@ class Pazpar2Controller extends SearchController
             $uo = new UserOptions($this->request);
             $sid = $uo->getSessionData('pz2session');
             $arr['live'] = $this->engine->ping($sid);
-            $this->request->setParam("format", "json");
-            //$this->request->setParam("render", "false");
-            $response = $this->getResponse(); 
+            $response = $this->getResponse();
+            $response->headers()->addHeaderLine("Content-type", "application/json");
             $response->setContent(json_encode($arr)); 
             // returned to View\Listener
             return $response;
@@ -288,6 +287,7 @@ class Pazpar2Controller extends SearchController
             $this->request->setParam("format", "json");
             //$this->request->setParam("render", "false");
             $response = $this->getResponse(); 
+            $response->headers()->addHeaderLine("Content-type", "application/json");
             $arr['sid'] = $sid;
             $response->setContent(json_encode($arr));
             return $response;
