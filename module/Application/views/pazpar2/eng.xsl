@@ -40,6 +40,7 @@ xmlns:php="http://php.net/xsl" exclude-result-prefixes="php">
 	<xsl:variable name="text_region_libraries_desc">Select the regions or individual libraries you wish to search</xsl:variable>
 	<xsl:variable name="text_libraries_desc">Select the libraries you wish to search</xsl:variable>
 	<xsl:variable name="text_subjects_desc">Select the libraries to search by the subjects they specialise in</xsl:variable>
+	<xsl:variable name="text_access_desc">Select the libraries to search according to your access rights</xsl:variable>
     <xsl:variable name="text_results_edition">Edition</xsl:variable>
     <xsl:variable name="text_results_publisher">Published by</xsl:variable>
     <xsl:variable name="text_search_module">Search the libraries</xsl:variable>

@@ -137,7 +137,12 @@
                 <xsl:if test="//config/groupby/option[@id='access']">
                     <li><span class="title">User affiliation:</span>
                         <xsl:choose>
-                            <xsl:when test="//pazpar2options/user-options/affiliation"><xsl:value-of select="//pazpar2options/user-options/affiliation"/></xsl:when>
+				<xsl:when test="//pazpar2options/user-options/affiliation">
+					You are a <span style="font-style: italic"><xsl:value-of select="//pazpar2options/user-options/readable_role"/></span>
+					<xsl:if test="//pazpar2options/user-options/readable_affiliation != 'Member of public'">
+						<xsl:text> at </xsl:text><span style="font-style:italic"><xsl:value-of select="//pazpar2options/user-options/readable_affiliation"/></span>
+					</xsl:if>
+				</xsl:when>
                             <xsl:otherwise>
                                 <xsl:text>Member of public</xsl:text>
                             </xsl:otherwise>
@@ -148,7 +153,7 @@
                     By <xsl:value-of select="//pazpar2options/user-options/selectedby"/>
                 </li>
                 <li><span class="title">Libraries in use:</span>
-                    <xsl:for-each select="//pazpar2options/user-options/targets/target">
+			<xsl:for-each select="//pazpar2options/user-options/targets/target">
                         <xsl:variable name="key" select="."/>
                         <xsl:value-of select="//all-targets/target[@target_id=$key]/display_name"/><xsl:if test="not(position() = last())">, </xsl:if>
                     </xsl:for-each>
@@ -185,23 +190,35 @@
 
         <xsl:if test="//config/groupby/option[@id='access']">
             <div class="set-option">
-                <h2>Select organisational membership</h2>
-                <p>Giving your organisational membership allows you to see what access rights you have at different libraries.</p>
-                <form>
-                    <label for="affiliation">Your organisation:</label> 
+                <h2>Select institutional membership</h2>
+                <p>Giving your institutional membership allows you to see what access rights you have at different libraries.</p>
+		<form action="/pazpar2/options" id="affiliation_form" method="post">
+			<input type="hidden" name="readable_role" id="readable_role"/>
+			<input type="hidden" name="readable_affiliation" id="readable_affiliation"/>
+		<xsl:variable name="current-affil">
+			<xsl:value-of select="substring-after(//pazpar2options/user-options/affiliation, '@')"/>
+		</xsl:variable>
                     <select id="affiliation" name="affiliation">
-                        <xsl:for-each select="//config/affiliations/affiliation">
-                            <option value="{@id}"><xsl:value-of select="@public"/></option>
-                        </xsl:for-each>
-                    </select><xsl:text>&nbsp;</xsl:text>
-                    <label for="role">Your role:</label>
-                    <select id="role" name="role">
-                        <xsl:for-each select="//config/affiliations/affiliation/role">
-                            <option value="{@id}"><xsl:value-of select="@public"/></option>
-                        </xsl:for-each>
-                    </select>
-                </form>
-            </div>
+			<option value=""> Select institution </option>
+			<xsl:for-each select="//all-institutions/*">
+					<option value="{@name}">
+						<xsl:if test="@name = $current-affil">
+							<xsl:attribute name="selected">selected</xsl:attribute>
+						</xsl:if>
+					<xsl:value-of select="."/></option>
+			</xsl:for-each>
+			<option value="he.m25lib.ac.uk">Other/Higher Education</option>
+			<option value="fe.m25lib.ac.uk">Other/Further Education</option>
+			<option value="pub.m25lib.ac.uk">Member of public</option>
+			</select><xsl:text>&nbsp;</xsl:text>
+                    <select id="role" name="role" style="visibility:hidden">
+                            <option value=""> Select role </option>
+		    </select>
+			<xsl:text>&nbsp;</xsl:text>
+                    <input type="submit" id="submit-affiliation" name="submit-affiliation" value="Submit" style="visibility:hidden"/>
+			
+	    </form>
+    </div>
         </xsl:if>
                 
         <div class="set-option">

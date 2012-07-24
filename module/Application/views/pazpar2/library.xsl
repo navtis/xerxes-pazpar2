@@ -47,6 +47,45 @@
 	<xsl:choose>
 		<xsl:when test="//libraries/library/type = 'virtual'"/>
 		<xsl:otherwise>
+		<div name="access-info">
+			  <xsl:choose>
+				  <xsl:when test="//config/groupby/option[@id='access']">
+					<xsl:choose>
+						<xsl:when test="//entitlements/entitlement[@rule_id > 0]">
+				  <p>As a <span style="font-style: italic"><xsl:value-of select="//user-options/readable_role"/></span> at  <span style="font-style:italic"><xsl:value-of select="//user-options/readable_affiliation"/></span> you have the right to:</p>
+				  <ul id="entitlements">
+					  <xsl:for-each select="//entitlements/entitlement[@rule_id > 0]">
+
+						  <li><xsl:choose>
+								 <xsl:when test="./entitlement_name = 'borrow'">
+									 <xsl:text>Borrow from </xsl:text> 
+								</xsl:when>
+								<xsl:when test="./entitlement_name = 'reference'">
+									<xsl:text>Use </xsl:text>
+								</xsl:when>
+								<xsl:when test="./entitlement_name = 'reserve'">
+									<xsl:text>Reserve items at </xsl:text>
+								</xsl:when>
+								<xsl:otherwise/>
+							</xsl:choose>
+							<xsl:text> this institution's libraries under the </xsl:text> <a href="{scheme_url}" target="_blank"><xsl:value-of select="scheme_name"/></a> scheme. <xsl:value-of select="charges"/> Requirements: <xsl:value-of select="requirements"/>
+						</li>
+					</xsl:for-each>
+				</ul>
+			</xsl:when>
+			<xsl:otherwise>
+				<p>As a <span style="font-style: italic"><xsl:value-of select="//user-options/readable_role"/></span> at  <span style="font-style:italic"><xsl:value-of select="//user-options/readable_affiliation"/></span>, your rights at this institution's libraries are not known; please confirm with the institution before visiting.</p>
+			</xsl:otherwise>
+		</xsl:choose>
+			  </xsl:when>
+			  <xsl:otherwise>
+				  <xsl:if test="//config/groupby/option[@id='access']">
+					  <p>If you select your home institution using the <em>User options</em> above, you can see what access rights you have in this institution's libraries.</p>
+				</xsl:if>
+			</xsl:otherwise>
+		</xsl:choose>
+		<br />
+		</div>
 			<xsl:choose>
 				<xsl:when test="$no-of-libraries = 1">
 					<p>This institution has one library.</p>
@@ -55,6 +94,7 @@
 					<p>This institution has <xsl:value-of select="$no-of-libraries"/> member libraries.</p>
 				</xsl:otherwise>
 			</xsl:choose>
+			<div id="map-container">
 			<div id="map-info">
 				<xsl:for-each select="//libraries/library">
 					<span class="library-data" name="{full_name}" x="{latitude}" y="{longitude}"/>
@@ -62,7 +102,8 @@
 			</div>
 			<div id="map" style="height: 250px; width: 400px;">
 			</div>
-			<span id="map-attribution">Map data © <a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors</span>
+			<span id="map-attribution">Map data © <a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors</span><br />
+		</div>
 		</xsl:otherwise>
 	</xsl:choose>
 		<xsl:for-each select="//libraries/library">

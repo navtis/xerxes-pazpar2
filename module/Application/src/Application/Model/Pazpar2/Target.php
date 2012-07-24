@@ -49,6 +49,10 @@ class Target extends DataValue
 	    $this->linkback_url = $this->vars['linkback_url'];
 	    $this->title_short = $this->vars['short_name'];
             $this->title_long = $this->vars['display_name'];
+            if ( isset($this->vars['domain']) )
+            {
+                $this->domain = $this->vars['domain'];
+            }
             if ( isset($this->vars['sort_name']) )
             {
                 $this->sort_name = $this->vars['sort_name'];

@@ -1,6 +1,7 @@
 /**
- * options page slider for pazpar2 max_records
- *
+ * options page functions
+ * - slider for pazpar2 max_records
+ * - affilation drop down management
  * @author David Walker
  * @author Graham Seaman
  * @copyright 2011 California State University
@@ -28,6 +29,48 @@ $(document).ready(function(){
         // now let the original submit continue..	
     });
 
+    // manage the affiliation drop downs (may not be present)
+    $("select#affiliation").change(function() {
+        $.ajax(
+        { 
+            url: "pazpar2/ajaxgetroles",
+            data: "format=json&affiliation=" + $('#affiliation').val(),
+            cache: false,
+            datatype: "json",
+	    success: function (data) {
+		// if affiliation removed hide role selection
+		if (data.affiliation == ''){
+			$('select#role').css('visibility', 'hidden');
+			$('#submit-affiliation').css('visibility', 'hidden');
+		} else {
+			var options = '<option value="">Select role</option>';
+			for (var key in data.roles){
+			           options += '<option value="' + key + '">' + data.roles[key] + '</option>';
+		        }
+			$("select#role").html(options);
+			$('select#role').css('visibility', 'visible');
+			$('#submit-affiliation').css('visibility', 'visible');
+			$('#submit-affiliation').attr("disabled", "true");
+		}
+	    },
+	    error: function(e, xhr){
+		alert( "System error: unable to select affiliation");	    
+	    }
+	});
+    });
+
+    // only allow submit if role selected
+    $("select#role").change(function() {
+	var role = $('select#role').val();
+	if (role == '')
+		$('#submit-affiliation').attr("disabled", "true");
+    	else {
+		$('#readable_role').val($("select#role :selected").text());
+		$('#readable_affiliation').val($("select#affiliation :selected").text());
+
+		$('#submit-affiliation').removeAttr('disabled');
+	}
+    });
 });  
 
 

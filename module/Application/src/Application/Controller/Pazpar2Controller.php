@@ -4,6 +4,7 @@ namespace Application\Controller;
 
 use Application\Model\Pazpar2\Engine,
     Application\Model\Pazpar2\Targets,
+    Application\Model\Pazpar2\Affiliations,
     Application\Model\Pazpar2\Subjects,
     Application\Model\Pazpar2\Libraries,
     Application\Model\Pazpar2\UserOptions,
@@ -61,6 +62,14 @@ class Pazpar2Controller extends SearchController
             $this->data['institution'] = $institution;
             $libs = new Libraries( $target );
             $this->data['libraries'] = $libs;
+            $uo = new UserOptions($this->request);
+            $this->data['useroptions'] = $uo;
+            if ( $uo->existsInSessionData( 'affiliation' ) )
+            {
+                $affil = $uo->getSessionData('affiliation');
+                $a = new Affiliations();
+                $this->data['entitlements'] = $a->getEntitlementsAtInstitution($target, $affil);
+            }        
         }
         return($this->data);
     }
@@ -75,7 +84,17 @@ class Pazpar2Controller extends SearchController
             $uo = new UserOptions($this->request);
             $uo->setSessionData('max_records', $max_records);
         }
-
+        else if ( $this->request->getParam('submit-affiliation') == 'Submit' )
+        {
+            // resetting user academic affiliation
+            $affiliation = $this->request->getParam('affiliation');
+            $role = $this->request->getParam('role');
+            $affiliation = $role . '@' . $affiliation;
+            $uo = new UserOptions($this->request);
+            $uo->setSessionData('affiliation', $affiliation);
+            $uo->setSessionData('readable_affiliation', $this->request->getParam('readable_affiliation'));
+            $uo->setSessionData('readable_role', $this->request->getParam('readable_role'));
+        }
         return($this->nameoptionsAction());
     }
 
@@ -85,6 +104,8 @@ class Pazpar2Controller extends SearchController
         // fetch all the target data for xsl lookups
         $pzt = new Targets();
         $this->data['all-targets'] = $pzt->toArray();
+        $pzt = new Affiliations();
+        $this->data['all-institutions'] = $pzt->getAllInstitutions();
         // fetch the selected data
         $uo = new UserOptions($this->request);
         $this->data['useroptions'] = $uo;
@@ -97,10 +118,27 @@ class Pazpar2Controller extends SearchController
         // fetch all the target data for xsl lookups
         $pzt = new Targets();
         $this->data['all-targets'] = $pzt->toArray();
+        $pzt = new Affiliations();
+        $this->data['all-institutions'] = $pzt->getAllInstitutions();
         // we need all subject data for lookups
         $s = new Subjects();
         $this->data['all-subjects'] = $s->getSubjects();
         // fetch the selected data
+        $uo = new UserOptions($this->request);
+        $this->data['useroptions'] = $uo;
+        return($this->data);
+    }
+
+    /* Select targets by user entitlements */
+    public function accessoptionsAction()
+    {
+        // fetch all the target data for xsl lookups
+        $pzt = new Targets();
+        $this->data['all-targets'] = $pzt->toArray();
+        $pzt = new Affiliations();
+        $this->data['all-institutions'] = $pzt->getAllInstitutions();
+
+
         $uo = new UserOptions($this->request);
         $this->data['useroptions'] = $uo;
         return($this->data);
@@ -270,10 +308,9 @@ class Pazpar2Controller extends SearchController
             $uo = new UserOptions($this->request);
             $sid = $uo->getSessionData('pz2session');
             $arr['live'] = $this->engine->ping($sid);
-            $response = $this->getResponse();
+            $response = $this->getResponse(); 
             $response->headers()->addHeaderLine("Content-type", "application/json");
             $response->setContent(json_encode($arr)); 
-            // returned to View\Listener
             return $response;
         }
 
@@ -284,14 +321,23 @@ class Pazpar2Controller extends SearchController
         {
             $sid = $this->request->getParam("session");
             $this->engine->setFinished($sid);
-            $this->request->setParam("format", "json");
-            //$this->request->setParam("render", "false");
-            $response = $this->getResponse(); 
+            $response = $this->getResponse();
             $response->headers()->addHeaderLine("Content-type", "application/json");
             $arr['sid'] = $sid;
             $response->setContent(json_encode($arr));
             return $response;
         }
 
-
+        public function ajaxgetrolesAction()
+        {
+            $affil = $this->request->getParam("affiliation");
+            $arr['affiliation'] = $affil;
+            $pzt = new Affiliations();
+            $arr['roles'] = $pzt->getRolesByAffiliation($affil);
+            //$arr['roles'] = array('std' => 'student', 'lec' => 'lecturer');
+            $response = $this->getResponse(); 
+            $response->headers()->addHeaderLine("Content-type", "application/json");
+            $response->setContent(json_encode($arr)); 
+            return $response;
+        }
 }

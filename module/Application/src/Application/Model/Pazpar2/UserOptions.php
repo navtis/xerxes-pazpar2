@@ -32,15 +32,17 @@ class UserOptions
         'targets' => 'array',
         // user affiliation
         'affiliation' => 'string', // in domain form
+        'readable_affiliation' => 'string', // in name form
         // user role
         'role' => 'string', // from set list
+        'readable_role' => 'string', // in name form
         // maximum records to fetch from search
         'max_records' => 'string', 
         // pazpar2 session id
         'pz2session' => 'string'
     );
     public $target_fields = array('names', 'subjects', 'types', 'distances', 'entitlements');
-    public $role_fields = array('affiliation', 'role');
+    public $role_fields = array('affiliation', 'readable_affiliation', 'role', 'readable_role');
     private $targets; // Targets object containing currently selected targets
 
     /**
@@ -66,6 +68,12 @@ class UserOptions
             {
                 $subjects = $request->getParam('subject', null, true);
                 $this->setSessionData('subjects', $subjects);
+                $this->setSessionData('selectedby', $selectedby);
+            }
+            else if ($selectedby == 'entitlements')
+            {
+                $entitlements = $request->getParam('entitlement', null, true);
+                $this->setSessionData('entitlements', $entitlements);
                 $this->setSessionData('selectedby', $selectedby);
             }
         }
@@ -114,6 +122,13 @@ class UserOptions
             case 'distances':
                 break;
             case 'entitlements':
+                $entitlement_ids = $this->getSessionData( 'entitlements' );
+                $ts = new Affiliations();
+                $affiliation = $this->getSessionData( 'affiliation' );
+                $ts = $ts->getTargetsByEntitlement( $entitlement_ids, $affiliation );
+                $targets = array_keys($ts);
+                //var_dump($targets); echo('<br />');
+                break;
         }
         $this->setSessionData('targets', $targets);
         return $targets;
