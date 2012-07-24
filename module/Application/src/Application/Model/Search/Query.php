@@ -26,7 +26,7 @@ class Query
 	
 	protected $stop_words = "";
 	protected $search_fields_regex = '^query[0-9]{0,1}$|^field[0-9]{0,1}$|^boolean[0-9]{0,1}$';
-	protected $limit_fields_regex = 'facet.*';	
+	protected $limit_fields_regex = '^facet.*';	
 	
 	protected $request; // xerxes request object
 	protected $config; // local config
@@ -66,7 +66,7 @@ class Query
 			
 			foreach ( $this->extractLimitGroupings() as $limit )
 			{
-				$this->addLimit($limit["field"], $limit["relation"], $limit["value"]);
+				$this->addLimit($limit["boolean"], $limit["field"], $limit["relation"], $limit["value"]);
 			}
 		}
 	}
@@ -156,6 +156,7 @@ class Query
 						$new_limit->value = array_pop($parts);
 						$new_limit->field = array_pop($parts);
 						$new_limit->key = true;
+						$new_limit->display = $limit->value;  // @todo: make this not 'display'
 					}
 					else
 					{
@@ -209,14 +210,29 @@ class Query
 	/**
 	 * Add a limit
 	 * 
+	 * @param string $boolean	boolean combine type
 	 * @param string $field		field name
 	 * @param string $relation	operator
 	 * @param string $phrase	the value of the limit
 	 */
 	
-	public function addLimit($field, $relation, $phrase)
+	public function addLimit($boolean, $field, $relation, $phrase)
 	{
-		$term = new LimitTerm($field, $relation, $phrase);
+		$term = new LimitTerm();
+		$term->boolean = $boolean;
+		$term->field = $field;
+		$term->relation = $relation;
+		$term->value = $phrase;
+		
+		if ( $boolean == 'NOT' )
+		{
+			$term->param = str_replace('facet.', 'facet.remove.', $field);
+		}
+		else
+		{
+			$term->param = $field;
+		}
+		
 		array_push($this->limits , $term);
 	}
 	
@@ -350,8 +366,19 @@ class Query
 				{
 					continue;
 				}
-					
+				
 				$arrTerm = array();
+				
+
+				if ( strstr($key, "facet.remove.") )
+				{
+					$key = str_replace('remove.', '', $key);
+					$arrTerm["boolean"] = "NOT";
+				}
+				else
+				{
+					$arrTerm["boolean"] = "";
+				}
 				
 				$arrTerm["field"] = $key;
 				$arrTerm["relation"] = "=";
@@ -431,8 +458,13 @@ class Query
 	
 	public function getAllSearchParams()
 	{
-		$limits = $this->extractLimitParams();
 		$search = $this->extractSearchParams();
+		$limits = array();
+		
+		if ( $this->request->getParam('clear-facets') != "true" )
+		{
+			$limits = $this->extractLimitParams();
+		}
 		
 		return array_merge($search, $limits);
 	}
@@ -488,5 +520,27 @@ class Query
 	public function getUser()
 	{
 		return $this->request->getUser();
+	}
+	
+	public static function getParamFromParts($field, $key, $excluded)
+	{
+		$param_name = 'facet';
+		
+		if ( $excluded === true )
+		{
+			$param_name .= '.remove';
+		}
+		
+		$param_name .= '.' . $field;
+		
+		// key defines a way to pass the (internal) value
+		// in the param, while the 'name' is the display value
+		
+		if ( $key != "" )
+		{
+			$param_name .= '.' . $key;
+		}
+		
+		return $param_name;
 	}
 }

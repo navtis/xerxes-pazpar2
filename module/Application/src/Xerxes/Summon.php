@@ -25,6 +25,12 @@ class Summon
 	protected $app_id; // summon application id
 	protected $session_id; // current session
 	protected $facets_to_include = array(); // facets that should be included in the response
+	protected $date_ranges_to_include = ''; // date ranges that should be included in the response filters
+	protected $facet_filters = array(); // filter on these facets
+	protected $start_date = '*'; // start date in range filter
+	protected $end_date = '*'; // end date in range filter
+	protected $complex_filters = array(); // complex facet filters
+	
 	protected $role; // user's role: authenticated or not
 	protected $holdings_only = false;
 	
@@ -70,7 +76,7 @@ class Summon
 	 * Execute a search
 	 * 
 	 * @param string $query		search query in summon syntax
-	 * @param array $filter		[optional] filters to apply
+	 * @param array $this->facet_filter		[optional] filters to apply
 	 * @param int $page			[optional] page number to start with
 	 * @param int $limit		[optional] total records per page
 	 * @param string $sortBy	[optional] sort restlts on this index
@@ -78,7 +84,7 @@ class Summon
 	 * @return array
 	 */
 	
-	public function query( $query, $filter = array(), $complex_filters = array(), $page = 1, $limit = 20, $sortBy = null )
+	public function query( $query, $page = 1, $limit = 20, $sortBy = null )
 	{
 		// convert this to summon query string
 		
@@ -107,16 +113,23 @@ class Summon
 		
 		// filters to be applied
 		
-		if ( count($filter) > 0 )
+		if ( count($this->facet_filters) > 0 )
 		{
-			$options['s.fvf'] = $filter;
+			$options['s.fvf'] = $this->facet_filters;
 		}
 		
 		// complex filters to be applied
 		
-		if ( count($complex_filters) > 0 )
+		if ( count($this->complex_filters) > 0 )
 		{
-			$options['s.fvgf'] = $complex_filters;
+			$options['s.fvgf'] = $this->complex_filters;
+		}
+
+		// date range filters to be applied
+		
+		if ( $this->start_date != '*' || $this->end_date != '*' )
+		{
+			$options['s.rf'] = 'PublicationDate,' . $this->start_date . ":" . $this->end_date;
 		}		
 		
 		// sort
@@ -134,6 +147,13 @@ class Summon
 		// facets to return in response
 		
 		$options['s.ff'] = $this->getFacetsToInclude();
+		
+		// date groupings to return in response
+		
+		if ( $this->date_ranges_to_include != '' )
+		{
+			$options['s.rff'] = 'PublicationDate,' . $this->date_ranges_to_include;
+		}		
 		
 		return $this->send($options);
 	}
@@ -292,14 +312,14 @@ class Summon
 	}
 	
 	/**
-	 * Set the facets that should be returned in the response
+	 * Add a facet to those that should be returned in the response
 	 * 
-	 * @param array $facets
+	 * @param string $facet
 	 */
 	
-	public function setFacetsToInclude(array $facets)
+	public function includeFacet($facet)
 	{
-		$this->facets_to_include = $facets;
+		$this->facets_to_include[] = $facet;
 	}
 	
 	/**
@@ -312,6 +332,65 @@ class Summon
 	{
 		return $this->facets_to_include;
 	}
+	
+	/**
+	 * set the date ranges to include in facet response
+	 *
+	 * @param string $ranges
+	 */
+	
+	public function setDateRangesToInclude($ranges)
+	{
+		$this->date_ranges_to_include = $ranges;
+	}	
+	
+	/**
+	 * Facet to filter on
+	 *
+	 * @param string $filter
+	 */
+	
+	public function addFilter($filter)
+	{
+		$this->facet_filters[] = $filter;
+	}
+	
+	/**
+	 * Complex facet to filter on
+	 *
+	 * @param string $filter
+	 */
+	
+	public function addComplexFilter($filter)
+	{
+		$this->complex_filters[] = $filter;
+	}
+	
+	/**
+	 * Start date to filter on
+	 *
+	 * @param string $filter
+	 */	
+	
+	public function setStartDate($date)
+	{
+		$this->start_date = $date;
+	}
+
+	/**
+	 * End date to filter on
+	 *
+	 * @param string $filter
+	 */
+	
+	public function setEndDate($date)
+	{
+		$this->end_date = $date;
+	}	
+	
+	/**
+	 * Tell Summon user is authenticated
+	 */
 	
 	public function setToAuthenticated()
 	{

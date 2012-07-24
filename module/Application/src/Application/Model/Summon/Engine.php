@@ -151,50 +151,100 @@ class Engine extends Search\Engine
 		
 		// facets to include in the response
 		
-		$facets_to_include = array();
-		
 		foreach ( $this->config->getFacets() as $facet_config )
 		{
-			$facets_to_include[(string) $facet_config["internal"]] = (string) $facet_config["internal"] . 
-				",or,1," . (string) $facet_config["max"]; 
+			if ( $facet_config['type'] == 'date' )
+			{
+				$this->summon_client->setDateRangesToInclude((string) $facet_config["ranges"]);
+			}
+			else
+			{
+				$this->summon_client->includeFacet( (string) $facet_config["internal"] .",or,1," . (string) $facet_config["max"] ); 
+			}
 		}
 		
 		// limits
 		
-		$facets = array();
-		$complex_facets = array();
-		
 		foreach ( $search->getLimits(true) as $limit )
 		{
-			// remove chosen facet from response
-			// $facets_to_include = Parser::removeFromArray($facets_to_include, $limit->field);
+			// holdings only
 			
-			$value = ''; // final value
-			
-			if ( is_array($limit->value) )
+			if ( $limit->field == 'holdings' )
 			{
-				foreach ( $limit->value as $limited )
-				{
-					$value .= ',' . str_replace(',', '\,', $limited);
-				}
-				
-				array_push($complex_facets, $limit->field . ",or" . $value);
+				$this->summon_client->limitToHoldings();
 			}
+			
+			// date type
+			
+			elseif ( $this->config->getFacetType($limit->field) == 'date' )
+			{
+				// @todo: make this not 'display'
+				
+				if ( $limit->value == 'start' )
+				{
+					$this->summon_client->setStartDate($limit->display);
+				}
+				elseif ( $limit->value == 'end' )
+				{
+					$this->summon_client->setEndDate($limit->display);
+				}
+			}
+			
+			// regular type
+			
 			else
 			{
-				array_push($facets, $limit->field . "," . str_replace(',', '\,', $limit->value) . ",false");
+				$value = '';
+				$boolean = 'false';
+					
+				if ( $limit->boolean == "NOT" )
+				{
+					$boolean = 'true';
+				}
+				
+				// multi-select filter
+					
+				if ( is_array($limit->value) )
+				{
+					// exclude
+					
+					if ( $boolean == 'true' ) 
+					{
+						foreach ( $limit->value as $limited )
+						{
+							$value = str_replace(',', '\,', $limited) ;
+							$this->summon_client->addFilter($limit->field . ",$value,$boolean");
+						}
+					}
+					
+					// inlcude
+					
+					else
+					{
+						foreach ( $limit->value as $limited )
+						{
+							$value .= ',' . str_replace(',', '\,', $limited);
+						}
+					
+						$this->summon_client->addComplexFilter($limit->field . ',' . $boolean . $value);
+					}
+				}
+				
+				// regular filter
+				
+				else
+				{
+					$value = str_replace(',', '\,', $limit->value);
+					$this->summon_client->addFilter($limit->field . ",$value,$boolean");
+				}
 			}
 		}
-		
-		// set actual response facets
-		
-		$this->summon_client->setFacetsToInclude($facets_to_include);
 
 		// filter out formats
 		
 		foreach ( $this->formats_exclude as $format )
 		{
-			array_push($facets, "ContentType,$format,true");
+			$this->summon_client->addFilter("ContentType,$format,true");
 		}
 		
 		// holdings only
@@ -217,7 +267,7 @@ class Engine extends Search\Engine
 		
 		// get the results
 		
-		$summon_results = $this->summon_client->query($query, $facets, $complex_facets, $page, $max, $sort);
+		$summon_results = $this->summon_client->query($query, $page, $max, $sort);
 		
 		return $this->parseResponse($summon_results);
 	}
@@ -278,7 +328,7 @@ class Engine extends Search\Engine
 		
 		// extract facets
 		
-		$facets = $this->extractFacets($summon_results, $total);	 ############## HACK	
+		$facets = $this->extractFacets($summon_results);
 		$result_set->setFacets($facets);
 		
 		return $result_set;
@@ -339,11 +389,26 @@ class Engine extends Search\Engine
 	 * @return Facets
 	 */	
 	
-	protected function extractFacets($summon_results, $total)
+	protected function extractFacets($summon_results)
 	{
 		$facets = new Search\Facets();
 		
-		if ( array_key_exists("facetFields", $summon_results) )
+		$facet_fields = array();
+		
+		if ( array_key_exists('facetFields', $summon_results) )
+		{
+			$facet_fields = $summon_results['facetFields'];
+		}
+		
+		if ( array_key_exists('rangeFacetFields', $summon_results) )
+		{
+			foreach ( $summon_results['rangeFacetFields'] as $range_facet )
+			{
+				$facet_fields[] = $range_facet;
+			}
+		}
+		
+		if ( count($facet_fields) > 0 )
 		{		
 			// @todo: figure out how to factor out some of this to parent class
 			
@@ -351,35 +416,40 @@ class Engine extends Search\Engine
 				
 			foreach ( $this->config->getFacets() as $group_internal_name => $config )
 			{
-				foreach ( $summon_results["facetFields"] as $facetFields )
+				foreach ( $facet_fields as $facetFields )
 				{
 					if ( $facetFields["displayName"] == $group_internal_name)
 					{
 						$group = new Search\FacetGroup();
 						$group->name = $facetFields["displayName"];
 						$group->public = $this->config->getFacetPublicName($facetFields["displayName"]);
+						
+						if ( $config['display'] == 'false' )
+						{
+							$group->display = 'false';
+						}
 							
 						$facets->addGroup($group);
 						
-						// choice type
+						// date type
 						
-						if ( (string) $config["type"] == "choice")
+						if ( (string) $config["type"] == "date")
 						{
-							foreach ($config->choice as $choice )
+							foreach ( $facetFields["counts"] as $counts )
 							{
-								foreach ( $facetFields["counts"] as $counts )
-								{
-									if ( $counts["value"] == (string) $choice["internal"] )
-									{
-										$facet = new Search\Facet();
-										$facet->name = (string) $choice["public"];
-										$facet->count = $counts["count"];
-										$facet->key = $counts["value"];
-										
-										$group->addFacet($facet);
-									}
-								}
+								$start_date = $counts['range']['minValue'];
+								$end_date = $counts['range']['maxValue'];
+								
+								
+								$facet = new Search\Facet();
+								$facet->name = "$start_date-$end_date";
+								$facet->count = $counts["count"];
+								$facet->key = "$start_date:$end_date";
+								$facet->is_date = true;
+									
+								$group->addFacet($facet);
 							}
+						
 						}
 						else // regular
 						{
@@ -395,7 +465,12 @@ class Engine extends Search\Engine
 								$facet = new Search\Facet();
 								$facet->name = $counts["value"];
 								$facet->count = $counts["count"];
-									
+								
+								if ( $counts['isNegated'] == '1')
+								{
+									$facet->is_excluded = 1;
+								}
+								
 								$group->addFacet($facet);
 							}
 						}

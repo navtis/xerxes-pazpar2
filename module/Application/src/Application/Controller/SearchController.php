@@ -69,9 +69,26 @@ abstract class SearchController extends ActionController
 		
 		$this->checkSpelling();
 		
+		// remove default field
+		
+		if (array_key_exists('field', $params) )
+		{
+			if ($params['field'] == 'keyword' )
+			{
+				unset($params['field']);
+			}
+		}
+		
 		// construct the actual url and redirect
 
 		$url = $this->request->url_for($params);
+		
+		// keep search refinements if user says so
+		
+		if ( $this->request->getParam('clear-facets') != '' )
+		{
+			$this->request->setSessionData('clear_facets', $this->request->getParam('clear-facets'));
+		}
 		
 		return $this->redirect()->toUrl($url);
 	}
@@ -310,6 +327,15 @@ abstract class SearchController extends ActionController
 		}
 		
 		return $suggestion;
+	}
+	
+	public function facetAction()
+	{
+		$this->request->setParam('max', 1);
+		
+		
+		
+		return $this->resultsAction();
 	}
 	
 	

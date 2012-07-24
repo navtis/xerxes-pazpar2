@@ -1,10 +1,10 @@
 <?php
 
-namespace Application\Model\Search;
+namespace Application\Model\Worldcat;
 
 /**
- * Search Facet
- *
+ * Worldcat Library Holdings
+ * 
  * @author David Walker
  * @copyright 2011 California State University
  * @link http://xerxes.calstate.edu
@@ -13,12 +13,10 @@ namespace Application\Model\Search;
  * @package Xerxes
  */
 
-class Facet
+class Library
 {
-	public $name;
-	public $count;
+	public $oclc;
+	public $institution;
+	public $address;
 	public $url;
-	public $key;
-	public $is_excluded;
-	public $is_date;
 }

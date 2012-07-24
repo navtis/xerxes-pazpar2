@@ -300,30 +300,44 @@ class Search
 		
 		if ( $facets != "" )
 		{
+			$group_id = 0;
+			
 			foreach ( $facets->getGroups() as $group )
 			{
+				// this is used for javascript selecting
+				
+				$group_id++;
+				$facet_id = 0;
+				
+				// group identifier
+				
+				$group->group_id = 'facet-' . $group_id;
+				$group->param_name = 'facet.' . $group->name;
+				
+				// link to multi-select facet page
+				
+				$group_params = $this->query->getAllSearchParams();
+				$group_params['controller'] = $this->request->getParam('controller');
+				$group_params['action'] = 'facet';
+				$group_params['group'] = $group->param_name;
+				
+				$group->url = $this->request->url_for($group_params);
+				
+				// print_r($group->getFacets());
+				
 				foreach ( $group->getFacets() as $facet )
 				{
+					$facet_id++;
 					
-					$param_name = '';
-												
-					if ( $facet->key != "" ) 
-					{
-						// key defines a way to pass the (internal) value
-						// in the param, while the name is the display value
-						
-						$param_name = 'facet.' . $group->name . '.' . urlencode($facet->key);
-					}
-					else
-					{
-						$param_name = 'facet.' . $group->name;									
-					}
+					$param_name = Query::getParamFromParts($group->name, urlencode($facet->key), $facet->is_excluded);
 					
 					// existing url plus our param
 					
 					$url = $this->facetParams();
 					$url[$param_name] = $facet->name;
 					$facet->url = $this->request->url_for($url);
+					
+					$facet->input_id = $group->group_id  . '-' . $facet_id;
 					
 					// add the name of the param as well
 					
@@ -335,10 +349,38 @@ class Search
 					{
 						$facet->selected = true;
 					}
+					
+					// exclude facet param
+					
+					$facet->param_exclude = str_replace('facet.', 'facet.remove.', $param_name);				
 				}
 			}
 		}
 	}
+	
+	/**
+	 * Helper function for XSLT to supress hidden limit inputs for a specific facet
+	 *
+	 * @param string $field  name of field to check if it is excluded
+	 * @param string $excluded  comma delimited list of fields to be exlcuded
+	 *
+	 * @return bool false if the field is in the exlcude list
+	 */
+	
+	public static function shouldIncludeLimit($field, $excluded)
+	{
+		$exclude_array = explode(',', $excluded);
+	
+		foreach ( $exclude_array as $exclude )
+		{
+			if ( $field == $exclude )
+			{
+				return false;
+			}
+		}
+	
+		return true;
+	}	
 	
 	/**
 	 * Add links to the query object limits
@@ -549,8 +591,9 @@ class Search
 	
 	public function searchRedirectParams()
 	{
-		$params = $this->currentParams();
-		$params["action"] = "results";
+		$params['controller'] = $this->request->getParam('controller');
+		$params['action'] = "results";
+		$params['sort'] = $this->request->getParam('sort');
 		
 		return $params;
 	}

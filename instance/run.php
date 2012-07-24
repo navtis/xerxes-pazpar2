@@ -5,7 +5,6 @@ Zend\Mvc\Service\ServiceManagerConfiguration;
 
 chdir(__DIR__);
 
-//$path = dirname(dirname(__DIR__));
 $path = dirname(__DIR__);
 
 // Composer autoloading

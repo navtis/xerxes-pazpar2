@@ -59,8 +59,7 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		
-
+	
 		<!-- search box area -->
 		
 		<xsl:call-template name="searchbox" />
@@ -94,6 +93,8 @@
 				
 				<xsl:call-template name="facets_applied" />
 													
+				<xsl:call-template name="spell_suggest" />
+				
 				<xsl:call-template name="no_hits" />
 				
 				<xsl:call-template name="search_recommendations" />
@@ -102,7 +103,7 @@
 
 				<xsl:call-template name="paging_navigation" />
 				
-				<xsl:call-template name="hidden_tag_layers" />
+				<!-- <xsl:call-template name="hidden_tag_layers" /> -->
 	
 			</div>
 			
@@ -132,6 +133,23 @@
 			</div>
 		</div>
 		
+		
+		<xsl:call-template name="results_loader" />
+		
+	</xsl:template>
+	
+	<!--
+		TEMPLATE: RESULTS LOADER
+	-->	
+	
+	<xsl:template name="results_loader">
+	
+		<div id="fullscreen" style="display:none">
+		</div>
+		<div id="loading" style="display:none">
+			<img src="images/ajax-loader.gif" alt="" /> Updating results . . . 
+		</div>	
+	
 	</xsl:template>
 
 	<!--
@@ -202,9 +220,11 @@
 	
 	<xsl:template name="searchbox">
 	
-		<form action="{//request/controller}/search" method="get">
+		<form id="form-main-search" action="{//request/controller}/search" method="get">	
 	
-			<input type="hidden" name="lang" value="{//request/lang}" />
+			<xsl:if test="//request/lang">
+				<input type="hidden" name="lang" value="{//request/lang}" />
+			</xsl:if>
 			
 			<xsl:call-template name="searchbox_hidden_fields_local" />
 	
@@ -212,16 +232,16 @@
 				<input type="hidden" name="sort" value="{request/sort}" />
 			</xsl:if>
 	
-		<xsl:choose>
-			<xsl:when test="$is_mobile = '1'">
-				<xsl:call-template name="searchbox_mobile" />
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:call-template name="searchbox_full" />
-			</xsl:otherwise>
-		</xsl:choose>
-	
-		</form>	
+			<xsl:choose>
+				<xsl:when test="$is_mobile = '1'">
+					<xsl:call-template name="searchbox_mobile" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:call-template name="searchbox_full" />
+				</xsl:otherwise>
+			</xsl:choose>
+			
+		</form>
 		
 	</xsl:template>
 
@@ -251,7 +271,7 @@
 			<div class="searchbox-mobile">
 				<input type="text" name="query" value="{$query}" />
 				<xsl:text> </xsl:text>
-				<input class="submit_searchbox{$language_suffix}" type="submit" name="Submit" value="{$text_searchbox_go}" />
+				<input class="submit_searchbox{$language_suffix}" type="submit" value="{$text_searchbox_go}" />
 			</div>
 			
 		</xsl:if>
@@ -321,16 +341,60 @@
 			
 			</div>
 			
-			<xsl:if test="spelling/url">
-				<p class="spell-suggest error">
-					<xsl:value-of select="$text_searchbox_spelling_error" /><xsl:text> </xsl:text>
-					<a href="{spelling/url}"><xsl:value-of select="spelling/query" /></a>
-				</p>
-			</xsl:if>	
+			<xsl:call-template name="search_refinement" />
 			
 			<xsl:call-template name="advanced_search_option" />
 			
 		</div>
+	
+	</xsl:template>
+
+	<!-- 	
+		TEMPLATE: SEARCH REFINEMENT
+	-->
+	
+	<xsl:template name="search_refinement">
+	
+		<xsl:if test="config/facet_multiple and results/facets">
+		
+			<div style="padding-top: 1em;">
+				<input id="results-clear-facets-false" type="radio" name="clear-facets" value="false">
+					<xsl:if test="//request/session/clear_facets = 'false'">
+						<xsl:attribute name="checked">checked</xsl:attribute>
+					</xsl:if>
+				</input>
+				<xsl:text> </xsl:text>
+				<label for="results-clear-facets-false"> Keep search refinements</label>
+				<xsl:text> </xsl:text>
+				<input id="results-clear-facets-true" type="radio" name="clear-facets" value="true">
+					<xsl:if test="not(//request/session/clear_facets) or //request/session/clear_facets != 'false'">
+						<xsl:attribute name="checked">checked</xsl:attribute>
+					</xsl:if>				
+				</input>
+				<xsl:text> </xsl:text>
+				<label for="results-clear-facets-true"> New search</label>
+			</div>
+			
+			<xsl:call-template name="hidden_search_inputs">
+				<xsl:with-param name="exclude_search_params">true</xsl:with-param>
+			</xsl:call-template>
+			
+		</xsl:if>	
+	
+	</xsl:template>
+
+	<!-- 	
+		TEMPLATE: SPELL SUGGEST
+	-->
+	
+	<xsl:template name="spell_suggest">
+	
+		<xsl:if test="spelling/url">
+			<p class="spell-suggest error">
+				<xsl:value-of select="$text_searchbox_spelling_error" /><xsl:text> </xsl:text>
+				<a href="{spelling/url}"><xsl:value-of select="spelling/query" /></a>
+			</p>
+		</xsl:if>	
 	
 	</xsl:template>
 	
@@ -472,56 +536,106 @@
 	
 	<xsl:template name="search_sidebar">
 			
-		<xsl:if test="//facets/groups">
+		<xsl:if test="//facets/groups[not(display)]">
 		
 			<div class="box">
 			
-				<h3>Narrow your results</h3>
+				<xsl:call-template name="facet_narrow_results" />
 				
-				<xsl:for-each select="//facets/groups/group">
+				<xsl:for-each select="//facets/groups/group[not(display)]">
 		
 					<h3><xsl:value-of select="public" /></h3>
 					
-					<!-- only show first 10, unless there is 12 or fewer, in which case show all 12 -->
-					
-					<ul>
-					<xsl:for-each select="facets/facet[position() &lt;= 10 or count(../facet) &lt;= 12]">
-						<xsl:call-template name="facet_option" />
-					</xsl:for-each>
-					</ul>
-					
-					<xsl:if test="count(facets/facet) &gt; 12">
-						
-						<p id="facet-more-{name}" class="facet-option-more"> 
-							[ <a id="facet-more-link-{name}" href="#" class="facet-more-option"> 
-								<xsl:value-of select="count(facets/facet[position() &gt; 10])" /> more
-							</a> ] 
-						</p>
-						
-						<ul id="facet-list-{name}" class="facet-list-more">
-							<xsl:for-each select="facets/facet[position() &gt; 10]">
-								<xsl:call-template name="facet_option" />
-							</xsl:for-each>
-						</ul>
-						
-						<p id="facet-less-{name}" class="facet-option-less"> 
-							[ <a id="facet-less-link-{name}" href="#" class="facet-less-option"> 
-								show less
-							</a> ] 
-						</p>
-	
-					</xsl:if>
+					<xsl:choose>
+						<xsl:when test="facets/facet/is_date">
+							<xsl:call-template name="facet_dates" />
+						</xsl:when>
+						<xsl:when test="//config/facet_multiple">
+							<xsl:call-template name="facet_multiple" />
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:call-template name="facet_links" />
+						</xsl:otherwise>
+					</xsl:choose>
 		
 				</xsl:for-each>
 			</div>
-			
-			<xsl:call-template name="sidebar_additional" />
 		
 		</xsl:if>
 	
 	</xsl:template>
 	
-	<!-- TEMPLATE: FACET OPTION -->
+	<xsl:template name="facet_dates">
+	
+		<form id="form-{group_id}" action="{//request/controller}/search" method="get">
+		
+			<xsl:variable name="start_date" select="concat(param_name,'.start')" />
+			<xsl:variable name="end_date" select="concat(param_name,'.end')" />
+
+
+			<xsl:call-template name="hidden_search_inputs">
+				<xsl:with-param name="exclude_limit" select="param_name" />
+			</xsl:call-template>
+	
+			<label for="facet-date-start">From: </label>
+			<input type="text" name="{$start_date}" id="facet-date-start" value="{//request/*[@original_key = $start_date]}" 
+				maxlength="4" size="4" />
+			
+			<br />
+			
+			<label for="facet-date-end">To: </label>
+			<input type="text" name="{$end_date}" id="facet-date-end" value="{//request/*[@original_key = $end_date]}" 
+				maxlength="4" size="4" />
+			
+			<br />
+			
+			<input type="submit" value="Update" />
+			
+		</form>
+		
+	</xsl:template>	
+	
+	<!-- 
+		TEMPLATE: FACET LINKS 
+	-->
+	
+	<xsl:template name="facet_links">
+	
+		<!-- only show first 10, unless there is 12 or fewer, in which case show all 12 -->
+		
+		<ul>
+		<xsl:for-each select="facets/facet[position() &lt;= 10 or count(../facet) &lt;= 12]">
+			<xsl:call-template name="facet_option" />
+		</xsl:for-each>
+		</ul>
+		
+		<xsl:if test="count(facets/facet) &gt; 12">
+			
+			<p id="facet-more-{name}" class="facet-option-more"> 
+				[ <a id="facet-more-link-{name}" href="#" class="facet-more-option"> 
+					<xsl:value-of select="count(facets/facet[position() &gt; 10])" /> more
+				</a> ] 
+			</p>
+			
+			<ul id="facet-list-{name}" class="facet-list-more">
+				<xsl:for-each select="facets/facet[position() &gt; 10]">
+					<xsl:call-template name="facet_option" />
+				</xsl:for-each>
+			</ul>
+			
+			<p id="facet-less-{name}" class="facet-option-less"> 
+				[ <a id="facet-less-link-{name}" href="#" class="facet-less-option"> 
+					show less
+				</a> ] 
+			</p>
+	
+		</xsl:if>	
+	
+	</xsl:template>
+	
+	<!-- 
+		TEMPLATE: FACET OPTION 
+	-->
 	
 	<xsl:template name="facet_option">
 	
@@ -539,6 +653,91 @@
 				&nbsp;(<xsl:value-of select="count" />)
 			</xsl:if>
 		</li>
+	
+	</xsl:template>
+	
+	<!-- 
+		TEMPLATE: FACET MULTIPLE 
+	-->	
+	
+	<xsl:template name="facet_multiple">
+		
+		<form id="form-{group_id}" action="{//request/controller}/search" method="get">
+		
+		<xsl:call-template name="hidden_search_inputs">
+			<xsl:with-param name="exclude_limit" select="param_name" />
+		</xsl:call-template>
+		
+		<ul>
+			<li class="facet-selection">
+				<input type="checkbox" class="facet-selection-clear" id="{group_id}">
+					<xsl:if test="not(facets/facet/selected)">
+						<xsl:attribute name="checked">checked</xsl:attribute>
+					</xsl:if>
+				</input>
+				<xsl:text> </xsl:text>
+				<label for="{group_id}">Any</label>
+			</li>
+			
+			<xsl:for-each select="facets/facet[(position() &lt;= 7 or selected or count(../facet) &lt;= 9) and not(is_excluded)]">
+				<xsl:call-template name="facet_selection" />
+			</xsl:for-each>
+			
+			<xsl:call-template name="facet_excluded" />
+			
+		</ul>
+				
+		<p id="facet-more-{name}" class="facet-option-more"> 
+			[ <a id="facet-more-link-{name}" href="{url}" class="facet-more-launch"> 
+				More Options
+			</a> ] 
+		</p>
+		
+		</form>
+	
+	</xsl:template>
+
+	<!-- 
+		TEMPLATE: FACET SELECTION 
+	-->
+	
+	<xsl:template name="facet_selection">
+		
+		<li class="facet-selection">
+		
+			<input type="checkbox" id="{input_id}" class="facet-selection-option {../../group_id}" name="{param_name}" value="{name}">
+				<xsl:if test="selected">
+					<xsl:attribute name="checked">checked</xsl:attribute>
+				</xsl:if>
+			</input>
+			
+			<xsl:text> </xsl:text>	
+			
+			<label for="{input_id}"><xsl:value-of select="name" /></label>
+			
+			<xsl:if test="count">
+				&nbsp;(<xsl:value-of select="count" />)
+			</xsl:if>
+			
+		</li>
+	
+	</xsl:template>
+
+	<!-- 
+		TEMPLATE: FACET EXCLUDED 
+	-->
+	
+	<xsl:template name="facet_excluded">
+	
+		<xsl:for-each select="facets/facet[is_excluded]">
+			<li class="facet-selection">
+				<!-- <img src="images/famfamfam/delete.png" /> -->
+				<input type="checkbox" id="{input_id}" class="facet-selection-option {../../group_id}" 
+					name="{param_exclude}" value="{name}" checked="checked" />
+				<xsl:text> </xsl:text>
+				<label style="text-decoration:line-through"><xsl:value-of select="name" /></label>
+			</li>
+		</xsl:for-each>	
 	
 	</xsl:template>
 
@@ -1042,6 +1241,52 @@
 		
 	</xsl:template>
 
+	<!--
+		TEMPLATE: HIDDEN SEARCH INPUTS
+	-->
+	
+	<xsl:template name="hidden_search_inputs">
+		<xsl:param name="exclude_search_params" />
+		<xsl:param name="exclude_limit" />
+		
+		<xsl:if test="not($exclude_search_params)">
+		
+			<xsl:for-each select="//query/terms/term">
+			
+				<input type="hidden" name="boolean" value="{boolean}" />
+				<input type="hidden" name="field" value="{field}" />
+				<input type="hidden" name="relation" value="{relation}" />
+				<input type="hidden" name="query" value="{query}" />
+				
+			</xsl:for-each>
+			
+		</xsl:if>
+		
+		<xsl:for-each select="//query/limits/limit">
+			
+			<xsl:if test="php:function('Application\View\Helper\Search::shouldIncludeLimit', string(field), string($exclude_limit))">
+				<xsl:call-template name="hidden_search_limit" />
+			</xsl:if>
+			
+		</xsl:for-each>					
+	
+	</xsl:template>
+	
+	<xsl:template name="hidden_search_limit">
+	
+		<xsl:choose>
+			<xsl:when test="value/*">
+				<xsl:for-each select="value/*">
+					<input type="hidden" name="{../../param}" value="{text()}" />
+				</xsl:for-each>
+			</xsl:when>
+			<xsl:otherwise>
+				<input type="hidden" name="{param}" value="{value}" />
+			</xsl:otherwise>
+		</xsl:choose>	
+	
+	</xsl:template>
+
 	<!-- search box fields overriden in templates -->
 	
 	<xsl:template name="advanced_search_option" />
@@ -1056,5 +1301,6 @@
 	<!-- search results templates -->
 	
 	<xsl:template name="search_recommendations" />
+	<xsl:template name="facet_narrow_results" />
 	
 </xsl:stylesheet>

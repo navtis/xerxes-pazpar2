@@ -9,15 +9,17 @@
  * @package Xerxes
  */
  
-$(document).ready(addAjaxToFacetMoreLinks);
+$(document).ready(addFacetMoreLinks);
+$(document).ready(addFacetSelection);
+$(document).ready(addFacetClear);
 $(document).ready(minimizeFacets);
 $(document).ready(showHitCounts);
 $(window).load(setNoImage);
 $(document).ready(fillAvailability);
-$(document).ready(addAjaxToSaveLinks);
+$(document).ready(addSaveLinks);
 
 
-function addAjaxToFacetMoreLinks()
+function addFacetMoreLinks()
 {
 	$(".facet-more-option").click(function() {
 		return showFacetMore(this.id);
@@ -43,6 +45,45 @@ function showFacetMore(id)
 	$('#facet-less-' + id).show();
 	
 	return false;
+}
+
+function addFacetSelection()
+{	
+	$('.facet-selection-option').click(function() {			
+			
+		group_array = this.id.split('-');
+		group_array.pop();
+		group_id =  group_array.join('-');
+		
+		$('#' + group_id).attr('checked', false);
+		
+		$('#form-' + group_id).submit();
+		loadWaitMessage();
+	});
+}
+
+function addFacetClear()
+{
+	$('.facet-selection-clear').click(function() {
+		$('input[class~="' + this.id + '"]').attr('checked', false);
+
+		$('#form-' + this.id).submit();
+		loadWaitMessage();
+	});	
+}
+
+function loadWaitMessage()
+{	
+	$('#fullscreen').show();
+	$('#loading').show();
+	
+	$('#fullscreen').css('top', $(window).scrollTop() + "px");
+	
+	mid_height = $(window).scrollTop() + ($(window).height() / 2 ) - 100;
+	mid_width = $(window).width() / 2;
+	
+	$('#loading').css('top', mid_height + "px");
+	$('#loading').css('left', mid_width + "px");
 }
 
 function showFacetLess(id)
@@ -138,7 +179,7 @@ function setNoImage()
 	}
 }
 
-function addAjaxToSaveLinks()
+function addSaveLinks()
 {	
 	$(".save-record").click(function() {
 		return updateRecord(this);
