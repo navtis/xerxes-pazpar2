@@ -130,6 +130,20 @@ li.hidden {
     background-image: url("../images/tabs/left_on.png");
 }
 
+/* library page */
+
+h2 {
+	margin-top: 0.5em;
+	margin-bottom: 1em;
+}
+
+#map-attribution{
+	font-size: 70%;
+}
+
+.heading{
+	font-weight: bold;
+}
 /* Search results */
 
 .tabs .results-pager{
@@ -159,6 +173,14 @@ li.hidden {
 
 #record-summary {
     float: left;
+}
+
+.holdings-table {
+	margin-bottom: 1em;
+}
+
+button#holdings-toggle{
+	margin: 1em 0 1em 4em;
 }
 
 /* for additional target status column on right of results page */

@@ -15,7 +15,6 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:php="http://php.net/xsl" exclude-result-prefixes="php">
 
-<xsl:import href="../includes.xsl" />
 <xsl:import href="../search/record.xsl" />
 <xsl:import href="../search/books.xsl" />
 <xsl:import href="includes.xsl" />
@@ -32,6 +31,9 @@
     <xsl:call-template name="record" />
 </xsl:template>
 
+<!-- turn off the sidebar temporarily -->
+<xsl:template name="sidebar_wrapper"/>
+
     <!-- 
          TEMPLATE: SIDEBAR 
     --> 
@@ -40,7 +42,7 @@
         <xsl:if test="//config/external_isn_link">
 		    <xsl:call-template name="external_links"/>
         </xsl:if>
-        <xsl:call-template name="citation" /> 
+	<xsl:call-template name="citation" />  
     </xsl:template>
 
     <xsl:template name="external_links">
@@ -63,7 +65,7 @@
 <!-- override javascript-include from ../includes.xsl GS -->
 <xsl:template name="javascript_include"> 
     <xsl:call-template name="jslabels" /> 
-    <script src="javascript/jquery/jquery-1.6.2.min.js" language="javascript" type="text/javascript"></script> <script src="javascript/results.js" language="javascript" type="text/javascript"></script> <script src="javascript/pz2_ping.js" language="javascript" type="text/javascript"></script> 
+    <script src="javascript/jquery/jquery-1.6.2.min.js" language="javascript" type="text/javascript"></script> <script src="javascript/results.js" language="javascript" type="text/javascript"></script> <script src="javascript/pz2_ping.js" language="javascript" type="text/javascript"></script><script src="javascript/pz2_record.js" language="javascript" type="text/javascript"></script> 
 </xsl:template> 
 
     <!--
@@ -204,8 +206,10 @@
     -->
 
     <xsl:template name="record_actions">
+	    <xsl:if test="count(//mergedHolding/holdings) > 1">
+   		<button id="holdings-toggle">Show holdings</button>
+	    </xsl:if>
         <div id="record-full-text" class="raised-box record-actions">
-    
         <xsl:for-each select="//mergedHolding/holdings">
             <xsl:call-template name="availability">
                 <xsl:with-param name="context">record</xsl:with-param>
@@ -350,6 +354,8 @@
 		<th colspan="2"></th>
                     </tr>
 				</xsl:if>
+                    <xsl:choose>
+			    <xsl:when test="items/item/location[. != 'linkback']">
 			<tr>
 				<th>Location</th>
 				<th>Call Number</th>
@@ -357,6 +363,11 @@
 				<th>Status</th>
 				<th>Due date</th>
 			</tr>
+			</xsl:when>
+			<xsl:otherwise>
+				    <tr />
+		</xsl:otherwise>
+	</xsl:choose>
 			<xsl:for-each select="items/item">
                 <xsl:variable name="loc">
                     <xsl:value-of select="location"/>
