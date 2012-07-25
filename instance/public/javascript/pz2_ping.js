@@ -22,12 +22,14 @@ $(document).ready(function(){
             datatype: "html",
             success: function(data)
             {
-                var data = JSON.parse(data);
                 // carry on pinging unless session dead
-                if (data['live'] == 'false')
+                if (data['live'] != true)
                 {
-                    alert("Debug: session died");
-                    clearInterval(pinger);
+                	clearInterval(pinger);
+                	alert('Session timed out - about to restart');
+                	var url = '/';
+                	window.location = url;
+                    	clearInterval(pinger);
                 }
             },
             error: function(e, xhr)
