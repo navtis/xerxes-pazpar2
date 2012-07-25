@@ -18,9 +18,27 @@ class Pazpar2 extends Search
     public function facetParams() 
     { 
         $params = $this->currentParams(); 
-        $params['action'] = 'search'; 
+        $params["start"] = null; // send us back to page 1
+        $params['action'] = 'search';
         return $params; 
     } 
+
+    /**
+     * Parameters to construct the url on the search redirect
+     * Needs to retain search parameters (unlike search helper)
+     * in order for pazpar2 facets to work
+     * @return array
+     */
+
+     public function searchRedirectParams()
+     {
+        $params = $this->currentParams(); 
+        $params['controller'] = $this->request->getParam('controller');
+        $params['action'] = "results";
+        $params['sort'] = $this->request->getParam('sort');
+
+        return $params;
+     }
 
     public function addQueryLinks(Query $query)
     {
