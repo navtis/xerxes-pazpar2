@@ -63,6 +63,17 @@ class Config extends Search\Config
                 }
         }
 
+    public function getDefaultSourceType()
+    {
+        $query = "//config[@name='sourcetype']/option[@default='true']/@id";
+        $values = $this->xml->xpath($query);
+        if ( count($values) > 0 )
+        {
+            return (string) $values[0];
+        }
+        else
+            return 'unknown';
+    }
 
     public function getMediumMap($group, $keys)
     {

@@ -37,11 +37,12 @@ class ConfigAffiliations extends Affiliations
 
     /**
      * Lists institutions accessible given an entitlement
+     * @param string $type          Kind of library to filter on
      * @param array $affiliation    EduPerson style role+domain
      * @param string $entitlement   array of entitlement ids
      * @return array                pz2_keys => institution names
      */
-    public function getTargetsByEntitlement($entitlements, $affiliation)
+    public function getTargetsByEntitlement($type, $entitlements, $affiliation)
     {
         return array();
     }

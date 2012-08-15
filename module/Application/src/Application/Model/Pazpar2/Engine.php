@@ -56,7 +56,7 @@ class Engine extends Search\Engine
             $start = $start - 1; // allow for pz2 starting from 0
             $max = $max - 1;
             $results = $this->client->pz2_show($start, $max, $sort);
-            $pzt = new Targets(array_keys($search->getTargetLocations()));
+            $pzt = new Targets(null, array_keys($search->getTargetLocations()));
             $result_set = new MergedResultSet($results, $pzt);
 
             // fetch facets

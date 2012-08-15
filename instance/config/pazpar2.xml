@@ -51,6 +51,13 @@
         <!-- Only required if Api is being used as datasource -->
         <config name="apiurl">http://xerxes.inform25.ac.uk:5225</config>
 
+
+        <!-- recognized target types -->
+        <config name="sourcetype" xml="true" pass="true">
+            <option id="online" public="Online" default="true"/>
+            <option id="library" public="Physical"/>
+        </config>
+
         <!-- Target details for(use with pazpar2 conf files in data/pazpar2) -->
         <!-- Used by ConfigTargets -->
         <config name="targets" xml="true" pass="false">
@@ -101,7 +108,6 @@
             <!-- options not yet available -->
             <!--
             <option id="access" public="By access right" url="/pazpar2/accessoptions" />
-            <option id="type" public="By type" url="/pazpar2/typeoptions" />
             <option id="distance" public="By distance" url="/pazpar2/distanceoptions" />
             -->
         </config>

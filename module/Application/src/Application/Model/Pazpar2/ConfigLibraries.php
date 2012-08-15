@@ -23,12 +23,6 @@ class ConfigLibraries extends Libraries
     protected $libraries = array();
     protected $client;
 
-    // Helper function 
-    function alphasort( $a, $b )
-    {
-        return strcmp( $a->name, $b->name );
-    }
-
     /**
      * Constructor
      * 
@@ -60,7 +54,10 @@ class ConfigLibraries extends Libraries
             $lib_arr[] = $library;
         }
 
-        usort( $lib_arr, array($this, 'alphasort') );
+        usort($lib_arr, function($a, $b) {
+            return strcmp( $a->name, $b->name );
+        });
+
         $this->libraries = $lib_arr;
     }
 

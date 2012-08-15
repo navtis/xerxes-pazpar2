@@ -152,10 +152,11 @@ class ConfigSubjects extends Subjects
 
     /**
      * Get all the pazpar2 targets which cover a particular subject
+     * @param string $type                  Kind of library to filter on
      * @param string/array $subject_ids     Single subject_id or array of subject_ids
      * @returns Targets object  
      */
-    public function getTargetsBySubject($subject_ids)
+    public function getTargetsBySubject($type, $subject_ids)
     {
         $ss = array();
         if (! is_array($subject_ids) )
@@ -168,6 +169,6 @@ class ConfigSubjects extends Subjects
         {
             $ss = array_merge($ss, $this->subjects_to_targets[$sn]);
         }
-        return new Targets($ss);
+        return new Targets($type, $ss);
     }
 }

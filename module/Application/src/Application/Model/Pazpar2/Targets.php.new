@@ -18,14 +18,14 @@ namespace Application\Model\Pazpar2;
 class Targets
 {
     protected $targets = array(); // array of Targets indexed by id
-    private $manager; // subclass to delegate calls to
+    protected $manager; // subclass to delegate calls to
 
     /**
      * Constructor
      * Populate with specified targets or all targets if none specified
      * Select library type by default, others only if specified
      */	
-    public function __construct($type, $targets = null)
+    public function __construct($type='library', $targets = null)
     {
 	// the 'real' class is given by the configuration file
 	$config = Config::getInstance();
@@ -82,8 +82,7 @@ class Targets
         }
         else
         {
-            // should never happen
-            return $this->manager->getIndividualTargets($keys);
+            return $this->manager->getTargets($keys);
         }
     }
 

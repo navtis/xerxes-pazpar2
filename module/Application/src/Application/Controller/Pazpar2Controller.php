@@ -57,12 +57,13 @@ class Pazpar2Controller extends SearchController
 
         if ( ($target = $this->request->getParam('target') ) != null )
         {
-            $t = new Targets();
+            $uo = new UserOptions($this->request);
+            $type = $uo->getSessionData('source_type');
+            $t = new Targets($type);
             $institution = $t->getIndividualTargets($target);
             $this->data['institution'] = $institution;
             $libs = new Libraries( $target );
             $this->data['libraries'] = $libs;
-            $uo = new UserOptions($this->request);
             $this->data['useroptions'] = $uo;
             if ( $uo->existsInSessionData( 'affiliation' ) )
             {
@@ -101,13 +102,14 @@ class Pazpar2Controller extends SearchController
     /* Select targets by name */
     public function nameoptionsAction()
     {
-        // fetch all the target data for xsl lookups
-        $pzt = new Targets();
+        // populate the target data for xsl lookups
+        $uo = new UserOptions($this->request);
+        $type = $uo->getSessionData('source_type');
+        $pzt = new Targets($type);
         $this->data['all-targets'] = $pzt->toArray();
         $pzt = new Affiliations();
         $this->data['all-institutions'] = $pzt->getAllInstitutions();
         // fetch the selected data
-        $uo = new UserOptions($this->request);
         $this->data['useroptions'] = $uo;
         return($this->data);
     }
@@ -116,7 +118,9 @@ class Pazpar2Controller extends SearchController
     public function subjectoptionsAction()
     {
         // fetch all the target data for xsl lookups
-        $pzt = new Targets();
+        $uo = new UserOptions($this->request);
+        $type = $uo->getSessionData('source_type');
+        $pzt = new Targets($type);
         $this->data['all-targets'] = $pzt->toArray();
         $pzt = new Affiliations();
         $this->data['all-institutions'] = $pzt->getAllInstitutions();
@@ -124,7 +128,6 @@ class Pazpar2Controller extends SearchController
         $s = new Subjects();
         $this->data['all-subjects'] = $s->getSubjects();
         // fetch the selected data
-        $uo = new UserOptions($this->request);
         $this->data['useroptions'] = $uo;
         return($this->data);
     }
@@ -133,13 +136,13 @@ class Pazpar2Controller extends SearchController
     public function accessoptionsAction()
     {
         // fetch all the target data for xsl lookups
-        $pzt = new Targets();
+        $uo = new UserOptions($this->request);
+        $type = $uo->getSessionData('source_type');
+        $pzt = new Targets($type);
         $this->data['all-targets'] = $pzt->toArray();
         $pzt = new Affiliations();
         $this->data['all-institutions'] = $pzt->getAllInstitutions();
 
-
-        $uo = new UserOptions($this->request);
         $this->data['useroptions'] = $uo;
         return($this->data);
     }
@@ -207,6 +210,7 @@ class Pazpar2Controller extends SearchController
     public function statusAction()
     {
         $uo = new UserOptions($this->request);
+        $this->data['useroptions'] = $uo;
         $sid = $uo->getSessionData('pz2session');
         $status = $this->engine->getSearchStatus($sid);
         // if status is finished, redirect to results
@@ -218,7 +222,8 @@ class Pazpar2Controller extends SearchController
         }
         
         $targets = $uo->getSessionData('targets');
-        $targets = new Targets($targets);
+        $type = $uo->getSessionData('source_type');
+        $targets = new Targets($type, $targets);
         $this->data['pz2results'] = $status->getTargetStatuses($targets);
         // keep the session number in the output HTML for AJAX
         $this->request->setSessionData('pz2session', $sid);
@@ -233,7 +238,7 @@ class Pazpar2Controller extends SearchController
         public function resultsAction()
         {
             //var_dump($this->request); exit;
-            $uo = new UserOptions($this->request);
+            $uo = new UserOptions($this->request); 
             $sid = $uo->getSessionData('pz2session');
             try
             {
@@ -255,9 +260,10 @@ class Pazpar2Controller extends SearchController
             }
             // keep the session number for the AJAX code in the output HTML
             $this->request->setSessionData('pz2session', $sid);
-            $result = parent::resultsAction(); // fetch the search results
             $targets = $uo->getSessionData('targets');
-            $targets = new Targets($targets);
+            $type = $uo->getSessionData('source_type');
+            $targets = new Targets($type, $targets);
+            $result['useroptions'] = $uo;
             $result['targets'] = $targets->getTargetNames(); // needed for the facets
             //$result['status'] = $status->getTargetStatuses($this->query->getTargets());
             //$result['externalLinks'] = $this->helper->addExternalLinks($this->config);
@@ -272,7 +278,7 @@ class Pazpar2Controller extends SearchController
     {
         $uo = new UserOptions($this->request);
         $sid = $uo->getSessionData('pz2session');
-        $targets = new Targets($uo->getSessionData('targets'));
+        $targets = new Targets($uo->getSessionData('source_type'), $uo->getSessionData('targets'));
         $id = $this->request->getParam('id'); 
         $offset = $this->request->getParam('offset', null, true); 
         try

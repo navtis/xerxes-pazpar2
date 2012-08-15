@@ -26,42 +26,40 @@ class ConfigTargets extends Targets
      * 
      */
         
-    public function __construct()
+    public function __construct($type, $targets)
     {
         // full set of Targets from configuration file 
         $this->config = Config::getInstance();
         $config = $this->config->getConfig("targets");
-
         if ( $config != null )
         { 
             $tgtArray = array();
             foreach ( $config->target as $target_data )
-            { 
-                $data = array();
-                // convert from SimpleXmlElement to array
-                foreach($target_data->attributes() as $a => $b) 
-                {
-                    $data[$a] = (string)$b;
+            {
+                if (( $type == null) || (string)$target_data->attributes()->type == $type)
+                {    
+                    $data = array();
+                    // convert from SimpleXmlElement to array
+                    foreach($target_data->attributes() as $a => $b) 
+                    {
+                        $data[$a] = (string)$b;
+                    }
+                    $target = new Target();
+                    $target->load($data);
+                    $tgtArray[] = $target;
                 }
-                $target = new Target();
-                $target->load($data);
-                $tgtArray[] = $target;
             }
-            usort( $tgtArray, array($this, 'alphasort') );
+            usort($tgtArray, function($a, $b) {
+                return strcmp( $a->title_short, $b->title_short );
+            });
 
             for( $i=0; $i < count($tgtArray); $i++)
             {
                 $tgt = $tgtArray[$i];
-                $tgt->position = $i;
+                $tgt->position = $i+1;
                 $this->targets[$tgt->pz2_key] = $tgt; 
             }
         }
-    }
-
-    // Helper function for getTargets()
-    function alphasort( $a, $b )
-    {
-        return strcmp( $a->title_short, $b->title_short );
     }
 
     /**
@@ -96,8 +94,10 @@ class ConfigTargets extends Targets
             }
         }               
         
-        usort( $arrTargets, 'alphasort' );
-        
+        usort($arrTargets, function($a, $b) {
+            return strcmp( $a->title_short, $b->title_short );
+        });
+
         return $arrTargets;
     }
         

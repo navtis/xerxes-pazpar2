@@ -59,16 +59,17 @@ class Affiliations
 
     /**
      * Lists institutions accessible given an entitlement
+     * @param string $type          kind of target to filter on
      * @param mixed $entitlement    (array of) entitlement id(s)
      * @param string affiliation    EduPerson style role+domain
      * @return array                pz2_keys => institution names
      */
-    public function getTargetsByEntitlement($entitlement, $affiliation)
+    public function getTargetsByEntitlement($type, $entitlement, $affiliation)
     {
         // convert scalar to array
         if (! is_array($entitlement) )
             $entitlement = array($entitlement);
-        return $this->manager->getTargetsByEntitlement($entitlement, $affiliation);
+        return $this->manager->getTargetsByEntitlement($type, $entitlement, $affiliation);
     }
 
     /**

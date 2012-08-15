@@ -88,12 +88,13 @@ class Subjects
 
     /**
      * Get all the pazpar2 targets which cover a particular subject
+     * @param string $type                  Kind of target to filter on
      * @param string/array $subject_ids     Single subject_id or array of subject_ids
      * @returns Targets object  
      */
-    public function getTargetsBySubject($subject_ids)
+    public function getTargetsBySubject($type, $subject_ids)
     {
-        return $this->manager->getTargetsBySubject($subject_ids);
+        return $this->manager->getTargetsBySubject($type, $subject_ids);
     }
 
     /**
@@ -105,7 +106,7 @@ class Subjects
      */
     public function getSubjectsByTarget($target_ids)
     {
-        return $this->manager->getTargetsBySubject($target_ids);
+        return $this->manager->getSubjectsByTarget($target_ids);
     }
 
 }

@@ -25,7 +25,7 @@ class UserOptions
         'selectedby' => 'string',
         'names' => 'array',
         'subjects' => 'array',
-        'types' => 'array',
+        'source_type' => 'string',
         'distances' => 'array',
         'entitlements' => 'array',
         // calculated targets to use
@@ -41,7 +41,7 @@ class UserOptions
         // pazpar2 session id
         'pz2session' => 'string'
     );
-    public $target_fields = array('names', 'subjects', 'types', 'distances', 'entitlements');
+    public $target_fields = array('names', 'subjects', 'distances', 'entitlements');
     public $role_fields = array('affiliation', 'readable_affiliation', 'role', 'readable_role');
     private $targets; // Targets object containing currently selected targets
 
@@ -53,6 +53,19 @@ class UserOptions
     public function __construct(Request $request)
     {
         $this->container = $request->getContainer('pazpar2options');
+
+        if( $request->getParam('sourcetype') != '' )
+        {
+            $this->setSessionData( 'source_type', $request->getParam('sourcetype') );
+            // if changing sourcetype, clear all old target selections
+            $this->unsetSessionData( 'selectedby' );
+        }
+        // default to 'library' type on first usage
+        else if (! $this->existsInSessionData( 'source_type' ) )
+        {
+            $config = Config::getInstance();
+            $this->setSessionData( 'source_type', $config->getDefaultSourceType() );
+        }
 
         // if this is a submit, change the session values as required
         if( $request->getParam('changetargets') != '' )
@@ -91,32 +104,30 @@ class UserOptions
             $this->setSessionData( 'names', array( 'all' ) );
             $key = 'names';
         }
-        $this->calculateTargets($key, $this->getSessionData( $key ) );
+        $this->calculateTargets($key, $this->getSessionData( $key ), $this->getSessionData( 'source_type') );
     }
 
     /**
      * Generate the actual targets needed depending on the 
      * selection method chosen
      */
-    protected function calculateTargets($key, $val)
+    protected function calculateTargets($key, $val, $type)
     {
         switch( $key )
         {
             case 'names':
                 if ($val[0] == 'all')
                 {
-                    $targets = new Targets();
+                    $targets = new Targets($type);
                     $targets = $targets->getTargetKeys();
                 }
                 else
                     $targets = $val; 
                 break;
-            case 'types':
-                break;
             case 'subjects':
                 $subj_ids = $this->getSessionData( 'subjects' );
                 $ts = new Subjects();
-                $ts = $ts->getTargetsBySubject( $subj_ids );
+                $ts = $ts->getTargetsBySubject( $type, $subj_ids );
                 $targets = $ts->getTargetKeys();
                 break;
             case 'distances':
@@ -125,9 +136,9 @@ class UserOptions
                 $entitlement_ids = $this->getSessionData( 'entitlements' );
                 $ts = new Affiliations();
                 $affiliation = $this->getSessionData( 'affiliation' );
-                $ts = $ts->getTargetsByEntitlement( $entitlement_ids, $affiliation );
+                $ts = $ts->getTargetsByEntitlement( $type, $entitlement_ids, $affiliation );
                 $targets = array_keys($ts);
-                //var_dump($targets); echo('<br />');
+                var_dump($targets); echo('<br />');
                 break;
         }
         $this->setSessionData('targets', $targets);

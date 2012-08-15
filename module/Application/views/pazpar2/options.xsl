@@ -150,6 +150,9 @@
                     </li>
                 </xsl:if>
                 <li><span class="title">Libraries selected:</span>
+                        <xsl:if test="//pazpar2options/user-options/source_type">
+                            <xsl:value-of select="//config/sourcetype/option[@id=//pazpar2options/user-options/source_type]/@public"/> libraries, 
+                        </xsl:if>
                     By <xsl:value-of select="//pazpar2options/user-options/selectedby"/>
                 </li>
                 <li><span class="title">Libraries in use:</span>
@@ -188,6 +191,24 @@
 
         </div>
 
+       <xsl:if test="//pazpar2options/user-options/source_type">
+	       <div class="set-option">
+		       <h2>Select library type to search</h2>
+		       <p>You can select which type of library you want to search</p>
+			<form action="/pazpar2/options" id="sourcetype_form" method="post">
+                    		<select id="sourcetype" name="sourcetype">
+					<option value=""> -- Select type -- </option>
+					<xsl:for-each select="//config/sourcetype/option"> 
+						<option value="{@id}"><xsl:value-of select="@public"/></option>
+					</xsl:for-each>
+				</select>
+				<xsl:text>&nbsp;</xsl:text>
+                    		<input type="submit" id="submit-sourcetype" name="submit-sourcetype" value="Submit"/>
+			</form>
+		</div>
+	</xsl:if>
+
+			   
         <xsl:if test="//config/groupby/option[@id='access']">
             <div class="set-option">
                 <h2>Select institutional membership</h2>
@@ -199,7 +220,7 @@
 			<xsl:value-of select="substring-after(//pazpar2options/user-options/affiliation, '@')"/>
 		</xsl:variable>
                     <select id="affiliation" name="affiliation">
-			<option value=""> Select institution </option>
+			<option value=""> -- Select institution -- </option>
 			<xsl:for-each select="//all-institutions/*">
 					<option value="{@name}">
 						<xsl:if test="@name = $current-affil">
@@ -212,7 +233,7 @@
 			<option value="pub.m25lib.ac.uk">Member of public</option>
 			</select><xsl:text>&nbsp;</xsl:text>
                     <select id="role" name="role" style="visibility:hidden">
-                            <option value=""> Select role </option>
+                            <option value=""> -- Select role -- </option>
 		    </select>
 			<xsl:text>&nbsp;</xsl:text>
                     <input type="submit" id="submit-affiliation" name="submit-affiliation" value="Submit" style="visibility:hidden"/>

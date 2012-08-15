@@ -31,7 +31,8 @@ class Query extends Search\Query
         $uo = new UserOptions($request);
 
         $tids = $uo->getSessionData('targets');
-        $this->targets = new Targets($tids);
+        $type = $uo->getSessionData('source_type');
+        $this->targets = new Targets($type, $tids);
     }
 
         /**
