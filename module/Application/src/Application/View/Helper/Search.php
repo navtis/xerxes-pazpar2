@@ -309,7 +309,7 @@ class Search
 				$group_id++;
 				$facet_id = 0;
 				
-				// group identifier
+				// group identifiers
 				
 				$group->group_id = 'facet-' . $group_id;
 				$group->param_name = 'facet.' . $group->name;
@@ -331,11 +331,52 @@ class Search
 					
 					$param_name = Query::getParamFromParts($group->name, urlencode($facet->key), $facet->is_excluded);
 					
-					// existing url plus our param
+					// link
 					
 					$url = $this->facetParams();
-					$url[$param_name] = $facet->name;
+					
+					if ( $facet->is_excluded == true )
+					{
+						// selecting this option removes our exclude param
+						
+						foreach ( $url as $key => $value )
+						{
+							if ( $key == $param_name)
+							{
+								// if we have multiple values, only remove the matching one
+								
+								if ( is_array($value) )
+								{
+									$new_array = array();
+									
+									foreach ( $value as $entry )
+									{
+										if ( $entry != $facet->name )
+										{
+											$new_array[] = $entry;
+										}
+									}
+									
+									$url[$key] = $new_array;
+								}
+								else
+								{
+									$url[$key] = '';
+								}
+							}
+						}
+					}
+					
+					else
+					{
+						// selecting this option adds our param
+					
+						$url[$param_name] = $facet->name;
+					}
+					
 					$facet->url = $this->request->url_for($url);
+
+					// facet identifiers
 					
 					$facet->input_id = $group->group_id  . '-' . $facet_id;
 					
@@ -369,6 +410,19 @@ class Search
 	
 	public static function shouldIncludeLimit($field, $excluded)
 	{
+		// if this is our three-part field, then take only the base
+		
+		$field_parts = explode('.', $field);
+		
+		if ( count($field_parts) > 2 )
+		{
+			array_pop($field_parts);
+			
+			$field = implode('.', $field_parts );
+		}
+		
+		// compare it to excluded fields
+		
 		$exclude_array = explode(',', $excluded);
 	
 		foreach ( $exclude_array as $exclude )

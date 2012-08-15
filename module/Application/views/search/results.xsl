@@ -49,87 +49,111 @@
 
 	<xsl:template name="search_page">
 
-		<xsl:variable name="sidebar">
+		<xsl:param name="sidebar">
 			<xsl:choose>
 				<xsl:when test="//config/search_sidebar = 'right'">
 					<xsl:text>right</xsl:text>
+				</xsl:when>
+				<xsl:when test="//config/search_sidebar = 'none'">
+					<xsl:text>none</xsl:text>
 				</xsl:when>
 				<xsl:otherwise>
 					<xsl:text>left</xsl:text>
 				</xsl:otherwise>
 			</xsl:choose>
-		</xsl:variable>
+		</xsl:param>
 	
 		<!-- search box area -->
 		
 		<xsl:call-template name="searchbox" />
 		
-		<!-- results area -->
+		<div>
+			<xsl:if test="config/use_tabs = 'true'">
+				<xsl:attribute name="class">tabs</xsl:attribute>
+			</xsl:if>
 		
-		<div class="">
-			<xsl:attribute name="class">
-				<xsl:choose>
-					<xsl:when test="$sidebar = 'right'">
-						<xsl:text>yui-ge</xsl:text>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:text>yui-gf</xsl:text>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:attribute>
+			<!-- tabs -->
 			
-			<!-- results -->
-	
-			<div>
-				<xsl:attribute name="class">
-					<xsl:text>yui-u</xsl:text>
-					<xsl:if test="$sidebar = 'right'">
-						<xsl:text> first</xsl:text>
-					</xsl:if>
-				</xsl:attribute>
-					
+			<xsl:if test="config/use_tabs = 'true'">
 			
-				<xsl:call-template name="sort_bar" />
-				
-				<xsl:call-template name="facets_applied" />
-													
-				<xsl:call-template name="spell_suggest" />
-				
-				<xsl:call-template name="no_hits" />
-				
-				<xsl:call-template name="search_recommendations" />
-		
-				<xsl:call-template name="brief_results" />
-
-				<xsl:call-template name="paging_navigation" />
-				
-				<!-- <xsl:call-template name="hidden_tag_layers" /> -->
-	
-			</div>
-			
-			<!-- sidebar -->
-			
-			<div>
-				<xsl:attribute name="class">
-					<xsl:text>yui-u</xsl:text>
-					<xsl:if test="$sidebar = 'left'">
-						<xsl:text> first</xsl:text>
-					</xsl:if>
-				</xsl:attribute>		
-					
-				
-				<div id="search-sidebar" class="sidebar {$sidebar}">	
-							
-					<!-- modules -->
-					
+				<div class="tab-{$sidebar}">				
 					<xsl:call-template name="search_modules" />
-									
-					<!-- facets -->
-					
-					<xsl:call-template name="search_sidebar" />
-					
 				</div>
-
+				
+			</xsl:if>
+			
+			<!-- results area -->
+			
+			<div class="">
+				<xsl:attribute name="class">
+					<xsl:choose>
+						<xsl:when test="$sidebar = 'right'">
+							<xsl:text>yui-ge</xsl:text>
+						</xsl:when>
+						<xsl:when test="$sidebar = 'left'">
+							<xsl:text>yui-gf</xsl:text>
+						</xsl:when>
+					</xsl:choose>
+				</xsl:attribute>
+				
+				<!-- results -->
+		
+				<div>
+					<xsl:attribute name="class">
+						<xsl:text>yui-u</xsl:text>
+						<xsl:if test="$sidebar = 'right'">
+							<xsl:text> first</xsl:text>
+						</xsl:if>
+					</xsl:attribute>
+				
+					<xsl:call-template name="sort_bar" />
+					
+					<xsl:call-template name="facets_applied" />
+														
+					<xsl:call-template name="spell_suggest" />
+					
+					<xsl:call-template name="no_hits" />
+					
+					<xsl:call-template name="search_recommendations" />
+			
+					<xsl:call-template name="brief_results" />
+	
+					<xsl:call-template name="paging_navigation" />
+					
+					<!-- <xsl:call-template name="hidden_tag_layers" /> -->
+		
+				</div>
+				
+				<!-- sidebar -->
+				
+				<xsl:if test="$sidebar != 'none'">
+				
+					<div>
+						<xsl:attribute name="class">
+							<xsl:text>yui-u</xsl:text>
+							<xsl:if test="$sidebar = 'left'">
+								<xsl:text> first</xsl:text>
+							</xsl:if>
+						</xsl:attribute>		
+							
+						
+						<div id="search-sidebar" class="sidebar {$sidebar}">	
+									
+							<!-- modules -->
+							
+							<xsl:if test="not(config/use_tabs = 'true')">
+								<xsl:call-template name="search_modules" />
+							</xsl:if>
+											
+							<!-- facets -->
+							
+							<xsl:call-template name="search_sidebar_facets" />
+							
+						</div>
+				
+					</div>
+					
+				</xsl:if>
 			</div>
 		</div>
 		
@@ -146,9 +170,14 @@
 	
 		<div id="fullscreen" style="display:none">
 		</div>
+		
 		<div id="loading" style="display:none">
 			<img src="images/ajax-loader.gif" alt="" /> Updating results . . . 
-		</div>	
+		</div>
+		
+		<div id="facet-selector" style="display:none; position:absolute; background-color: #fff">
+			<iframe id="facet-selector-page" style="width: 100%; height: 100%" />
+		</div>			
 	
 	</xsl:template>
 
@@ -169,7 +198,7 @@
 					<div class="yui-u">
 						<xsl:choose>
 							<xsl:when test="//sort_display">
-								<div id="sort-options" data-role="controlgroup" data-type="horizontal">
+								<div id="sort-options" data-role="controlgroup" data-type="horizontal" data-mini="true">
 									<xsl:copy-of select="$text_results_sort_by" /><xsl:text>: </xsl:text>
 									<xsl:for-each select="//sort_display/option">
 										<xsl:choose>
@@ -220,7 +249,9 @@
 	
 	<xsl:template name="searchbox">
 	
-		<form id="form-main-search" action="{//request/controller}/search" method="get">	
+		<xsl:param name="action"><xsl:value-of select="//request/controller" />/search</xsl:param>
+	
+		<form id="form-main-search" action="{$action}" method="get">	
 	
 			<xsl:if test="//request/lang">
 				<input type="hidden" name="lang" value="{//request/lang}" />
@@ -324,10 +355,10 @@
 						</xsl:variable>
 					
 						<option value="{$internal}">
-						<xsl:if test="//request/field = $internal">
-							<xsl:attribute name="selected">seleted</xsl:attribute>
-						</xsl:if>
-						<xsl:value-of select="@public" />
+							<xsl:if test="//request/field = $internal">
+								<xsl:attribute name="selected">seleted</xsl:attribute>
+							</xsl:if>
+							<xsl:value-of select="@public" />
 						</option>
 						
 					</xsl:for-each>
@@ -355,7 +386,7 @@
 	
 	<xsl:template name="search_refinement">
 	
-		<xsl:if test="config/facet_multiple and results/facets">
+		<xsl:if test="config/facet_multiple = 'true' and results/facets">
 		
 			<div style="padding-top: 1em;">
 				<input id="results-clear-facets-false" type="radio" name="clear-facets" value="false">
@@ -407,7 +438,15 @@
 		
 		<xsl:if test="config/search">
 		
-			<div id="search-modules">
+			<div>
+				<xsl:choose>
+					<xsl:when test="config/use_tabs = 'true'">
+						<xsl:attribute name="id">tabnav</xsl:attribute>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:attribute name="id">search-modules</xsl:attribute>
+					</xsl:otherwise>
+				</xsl:choose>
 			
 				<!-- <h2>Search Options</h2> -->
 				
@@ -530,11 +569,11 @@
 	</xsl:template>
 	
 	<!-- 
-		TEMPLATE: SEARCH SIDEBAR 
+		TEMPLATE: SEARCH SIDEBAR FACETS
 		the sidebar within the search results
 	-->
 	
-	<xsl:template name="search_sidebar">
+	<xsl:template name="search_sidebar_facets">
 			
 		<xsl:if test="//facets/groups[not(display)]">
 		
@@ -550,7 +589,7 @@
 						<xsl:when test="facets/facet/is_date">
 							<xsl:call-template name="facet_dates" />
 						</xsl:when>
-						<xsl:when test="//config/facet_multiple">
+						<xsl:when test="//config/facet_multiple = 'true'">
 							<xsl:call-template name="facet_multiple" />
 						</xsl:when>
 						<xsl:otherwise>
@@ -687,8 +726,8 @@
 			
 		</ul>
 				
-		<p id="facet-more-{name}" class="facet-option-more"> 
-			[ <a id="facet-more-link-{name}" href="{url}" class="facet-more-launch"> 
+		<p id="facet-more-{group_id}" class="facet-option-more"> 
+			[ <a id="facet-more-link-{group_id}" href="{url}" class="facet-more-launch"> 
 				More Options
 			</a> ] 
 		</p>
@@ -730,12 +769,12 @@
 	<xsl:template name="facet_excluded">
 	
 		<xsl:for-each select="facets/facet[is_excluded]">
-			<li class="facet-selection">
-				<!-- <img src="images/famfamfam/delete.png" /> -->
-				<input type="checkbox" id="{input_id}" class="facet-selection-option {../../group_id}" 
-					name="{param_exclude}" value="{name}" checked="checked" />
-				<xsl:text> </xsl:text>
-				<label style="text-decoration:line-through"><xsl:value-of select="name" /></label>
+			<li class="facet-selection facet-excluded">
+				<a href="{url}">
+					<img src="images/famfamfam/delete.png" alt="remove exlcuded facet" />
+					<xsl:text> </xsl:text>
+					<span class="facet-excluded-text"><xsl:value-of select="name" /></span>
+				</a>
 			</li>
 		</xsl:for-each>	
 	
@@ -748,7 +787,7 @@
 	
 	<xsl:template name="facets_applied">
 		
-		<xsl:if test="query/limits">
+		<xsl:if test="not(//config/facet_multiple = 'true') and query/limits">
 			<div class="results-facets-applied">
 				<ul>
 					<xsl:for-each select="query/limits/limit">
@@ -807,110 +846,133 @@
 				</xsl:choose>
 			</xsl:variable>
 			
-			<a class="results-title" href="{../url_full}"><xsl:value-of select="$title" /></a>
+			<xsl:choose>
+				<xsl:when test="$is_mobile = 1">
+				
+					<a href="{../url_full}">
+						<xsl:value-of select="$title" />
+						<xsl:call-template name="brief_result_info" />
+					</a>
+					
+				</xsl:when>
+				<xsl:otherwise>
 			
-			<div class="results-info">
-			
-				<div class="results-type">
-				
-					<!-- format -->
-				
-					<xsl:call-template name="text_results_format">
-						<xsl:with-param name="format" select="format/public" />
-					</xsl:call-template>
+					<a class="results-title" href="{../url_full}"><xsl:value-of select="$title" /></a>
+					<xsl:call-template name="brief_result_info" />
 					
-					<!-- language note -->
-					
-					<xsl:call-template name="text_results_language" />
-					
-					<!-- peer reviewed -->
-					
-					<xsl:if test="refereed">
-						<xsl:text> </xsl:text><xsl:call-template name="img_refereed" />
-						<xsl:text> </xsl:text><xsl:copy-of select="$text_results_refereed" />
-					</xsl:if>
-				</div>
-				
-				<!-- abstract -->
-				
-				<div class="results-abstract">
-				
-					<xsl:choose>
-						<xsl:when test="summary_type = 'toc'">
-							<xsl:value-of select="$text_record_summary_toc" /><xsl:text>: </xsl:text>
-						</xsl:when>
-						<xsl:when test="summary_type = 'subjects'">
-							<xsl:value-of select="$text_record_summary_subjects" /><xsl:text>: </xsl:text>
-						</xsl:when>					
-					</xsl:choose>
-				
-					<xsl:choose>
-						<xsl:when test="string-length(summary) &gt; 300">
-							<xsl:value-of select="substring(summary, 1, 300)" /> . . .
-						</xsl:when>
-						<xsl:when test="summary">
-							<xsl:value-of select="summary" />
-						</xsl:when>
-						
-					</xsl:choose>
-				</div>
-				
-				<!-- primary author -->
-				
-				<xsl:if test="primary_author">
-					<span class="results-author">
-						<strong><xsl:copy-of select="$text_results_author" />: </strong><xsl:value-of select="primary_author" />
-					</span>
-				</xsl:if>
-				
-				<!-- publication year -->
-				
-				<xsl:if test="year">
-					<span class="results-year">
-						<strong><xsl:copy-of select="$text_results_year" />: </strong>
-						<xsl:value-of select="year" />
-					</span>
-				</xsl:if>
-				
-				<!-- journal info -->
-				
-				<xsl:if test="journal or journal_title">
-					<span class="results-publishing">
-						<strong><xsl:copy-of select="$text_results_published_in" />: </strong>
-						<xsl:choose>
-							<xsl:when test="journal_title">
-								<xsl:value-of select="journal_title" />
-							</xsl:when>
-							<xsl:otherwise>
-								<xsl:value-of select="journal" />
-							</xsl:otherwise>
-						</xsl:choose>
-					</span>
-				</xsl:if>
-				
-				<!-- custom area for local implementatin to add junk -->
-				
-				<xsl:call-template name="additional_brief_record_data" />
-				
-				<div class="record-actions">
-					
-					<!-- full text -->
-					
-					<xsl:call-template name="full_text_options" />
-					
-					<!-- custom area for additional links -->
-					
-					<xsl:call-template name="additional_record_links" />
-					
-					<!-- save record -->
-					
-					<xsl:call-template name="save_record" />
-								
-				</div>
-				
-			</div>
+				</xsl:otherwise>
+			</xsl:choose>
 			
 		</li>
+	
+	</xsl:template>
+
+	<!-- 
+		TEMPLATE: BRIEF RESULT INFO
+	-->
+	
+	<xsl:template name="brief_result_info">
+
+		<div class="results-info">
+		
+			<div class="results-type">
+			
+				<!-- format -->
+			
+				<xsl:call-template name="text_results_format">
+					<xsl:with-param name="format" select="format/public" />
+				</xsl:call-template>
+				
+				<!-- language note -->
+				
+				<xsl:call-template name="text_results_language" />
+				
+				<!-- peer reviewed -->
+				
+				<xsl:if test="refereed">
+					<xsl:text> </xsl:text><xsl:call-template name="img_refereed" />
+					<xsl:text> </xsl:text><xsl:copy-of select="$text_results_refereed" />
+				</xsl:if>
+			</div>
+			
+			<!-- abstract -->
+			
+			<div class="results-abstract">
+			
+				<xsl:choose>
+					<xsl:when test="summary_type = 'toc'">
+						<xsl:value-of select="$text_record_summary_toc" /><xsl:text>: </xsl:text>
+					</xsl:when>
+					<xsl:when test="summary_type = 'subjects'">
+						<xsl:value-of select="$text_record_summary_subjects" /><xsl:text>: </xsl:text>
+					</xsl:when>					
+				</xsl:choose>
+			
+				<xsl:choose>
+					<xsl:when test="string-length(summary) &gt; 300">
+						<xsl:value-of select="substring(summary, 1, 300)" /> . . .
+					</xsl:when>
+					<xsl:when test="summary">
+						<xsl:value-of select="summary" />
+					</xsl:when>
+					
+				</xsl:choose>
+			</div>
+			
+			<!-- primary author -->
+			
+			<xsl:if test="primary_author">
+				<span class="results-author">
+					<strong><xsl:copy-of select="$text_results_author" />: </strong><xsl:value-of select="primary_author" />
+				</span>
+			</xsl:if>
+			
+			<!-- publication year -->
+			
+			<xsl:if test="year">
+				<span class="results-year">
+					<strong><xsl:copy-of select="$text_results_year" />: </strong>
+					<xsl:value-of select="year" />
+				</span>
+			</xsl:if>
+			
+			<!-- journal info -->
+			
+			<xsl:if test="journal or journal_title">
+				<span class="results-publishing">
+					<strong><xsl:copy-of select="$text_results_published_in" />: </strong>
+					<xsl:choose>
+						<xsl:when test="journal_title">
+							<xsl:value-of select="journal_title" />
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="journal" />
+						</xsl:otherwise>
+					</xsl:choose>
+				</span>
+			</xsl:if>
+			
+			<!-- custom area for local implementatin to add junk -->
+			
+			<xsl:call-template name="additional_brief_record_data" />
+			
+			<div class="record-actions">
+				
+				<!-- full text -->
+				
+				<xsl:call-template name="full_text_options" />
+				
+				<!-- custom area for additional links -->
+				
+				<xsl:call-template name="additional_record_links" />
+				
+				<!-- save record -->
+				
+				<xsl:call-template name="save_record" />
+							
+			</div>
+			
+		</div>
 	
 	</xsl:template>
 

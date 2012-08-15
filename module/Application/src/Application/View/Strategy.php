@@ -147,8 +147,7 @@ class Strategy implements ListenerAggregateInterface
 				}
 			}
 			
-			
-			
+
 			
 			// show internal xml
 			
@@ -161,17 +160,18 @@ class Strategy implements ListenerAggregateInterface
 			
 			else
 			{
-				// determine which view script to use
+				// error
 				
 				if ( $e->getResponse()->getStatusCode() != 200 ) // @todo investigate error render strategy
 				{
 					$model->setVariable("display_exceptions", true);
 					$model->setTemplate('error/index.phtml');
 				}
-				else
+				
+				// template not already set, so grab out of config / convention
+				
+				elseif ( ! strstr($model->getTemplate(), '.') )
 				{
-					// determine which view script to use
-					
 					$script = $request->getControllerMap()->getView($request->getParam('format'));
 					
 					// test view chosen

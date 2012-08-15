@@ -41,6 +41,18 @@
 	
 	<xsl:variable name="base_url" select="//base_url" />
 	
+	<xsl:variable name="base_include">
+		<xsl:choose>
+			<xsl:when test="//config/shared_assets">
+				<xsl:value-of select="//config/shared_assets" />	
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="$base_url" />			
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	
+	
 	<xsl:variable name="xerxes_version" select="//config/xerxes_version" />
 
 	<xsl:variable name="link_target" select="//config/link_target" />
@@ -219,7 +231,12 @@
 		<head>
 		<title><xsl:value-of select="//config/application_name" />: <xsl:call-template name="title" /></title>
 		<xsl:call-template name="surround_meta" />
-		<base href="{$base_url}/" />
+		
+		<!-- jquery mobile adds its own base tag, so we don't here; weird, I know -->
+		
+		<xsl:if test="$is_mobile = 0">
+			<base href="{$base_url}/" />
+		</xsl:if>
 		
 		<!-- css -->
 		<xsl:call-template name="css_include" />
@@ -276,7 +293,7 @@
 			
 				<div id="yui-main">
 					<div class="yui-b">
-						<xsl:if test="string(//session/flash_message)">
+						<xsl:if test="string(//flash_message)">
 							<xsl:call-template name="message_display"/>
 						</xsl:if>
 						
@@ -386,21 +403,16 @@
 				
 				<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
 				<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-				<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>					
-
-				<!-- @todo: remove this when we square away css on production systems -->
-					
-				<style type="text/css">
-					.results-info, .sidebar, #bd-top, #bd h1, #tabnav, .save-record-action { display: none; }
-				</style>
+				<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
 				
-				<link href="css/local-mobile.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
+				<link href="{$base_include}/css/xerxes-mobile.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
+				<link href="{$base_url}/css/local-mobile.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
 
 			</xsl:when>
 			<xsl:otherwise>
 				
-				<link href="css/reset-fonts-grids.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
-				<link href="css/xerxes-blue.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
+				<link href="{$base_include}/css/reset-fonts-grids.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
+				<link href="{$base_include}/css/xerxes-blue.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
 				<link href="css/local.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
 				
 			</xsl:otherwise>
@@ -416,7 +428,7 @@
 	
 	<xsl:template name="message_display">
 		<div id="message-display">
-			<xsl:copy-of select="//session/flash_message"/>
+			<xsl:copy-of select="//flash_message"/>
 		</div>
 	</xsl:template>
 	
@@ -481,8 +493,6 @@
 		<a href="{$base_url}/" data-icon="home">Home</a>
 	
 		<h1><xsl:value-of select="$text_app_name" /></h1>
-		
-		<!-- <a href="{$base_url}"></a> -->
 	
 	</xsl:template>
 	
@@ -563,9 +573,9 @@
 			
 		<xsl:call-template name="jslabels" />
 	
-		<script src="javascript/jquery/jquery-1.6.2.min.js" language="javascript" type="text/javascript"></script>
+		<script src="{$base_include}/javascript/jquery/jquery-1.6.2.min.js" language="javascript" type="text/javascript"></script>
 		
-		<script src="javascript/results.js" language="javascript" type="text/javascript"></script>
+		<script src="{$base_include}/javascript/results.js" language="javascript" type="text/javascript"></script>
 
 	</xsl:template>
 		
