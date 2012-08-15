@@ -155,6 +155,17 @@
         </ul>
         </span>
     </xsl:template>
+    
+    <!-- 
+    	TEMPLATE: NO HITS 
+	--> 
+	<xsl:template name="no_hits"> 
+		<xsl:if test="not(results/total) or results/total = '0'"> 
+			<div class="no-hits error"> 
+				<xsl:value-of select="$text_metasearch_hits_no_match" />
+			</div> 
+		</xsl:if> 
+	</xsl:template> 
 
 	<!--
 		TEMPLATE: SORT BAR
@@ -163,8 +174,7 @@
 	<xsl:template name="sort_bar">
 	
 		<xsl:choose>
-            <!-- when finished as well -->
-			<xsl:when test="//bytarget/finished=1 and results/total = '0'">
+			<xsl:when test="results/total = '0'">
 				<xsl:call-template name="no_hits" />
 			</xsl:when>
 			<xsl:otherwise>
