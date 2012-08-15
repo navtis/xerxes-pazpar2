@@ -43,7 +43,7 @@ class Pazpar2Controller extends SearchController
                 // message category separated from message by pipe symbol
                 // categories: Error, Warning, Info, Success
                 $comm = explode('|', $msg);
-                $this->data[$comm[0]] = $comm[1];
+                $this->data->setVariable($comm[0], $comm[1]);
             }
             $this->flashMessenger->clearMessages();
         }
@@ -61,15 +61,15 @@ class Pazpar2Controller extends SearchController
             $type = $uo->getSessionData('source_type');
             $t = new Targets($type);
             $institution = $t->getIndividualTargets($target);
-            $this->data['institution'] = $institution;
+            $this->data->setVariable('institution', $institution);
             $libs = new Libraries( $target );
-            $this->data['libraries'] = $libs;
-            $this->data['useroptions'] = $uo;
+            $this->data->setVariable('libraries', $libs);
+            $this->data->setVariable('useroptions', $uo);
             if ( $uo->existsInSessionData( 'affiliation' ) )
             {
                 $affil = $uo->getSessionData('affiliation');
                 $a = new Affiliations();
-                $this->data['entitlements'] = $a->getEntitlementsAtInstitution($target, $affil);
+                $this->data->setVariable('entitlements', $a->getEntitlementsAtInstitution($target, $affil));
             }        
         }
         return($this->data);
@@ -106,11 +106,11 @@ class Pazpar2Controller extends SearchController
         $uo = new UserOptions($this->request);
         $type = $uo->getSessionData('source_type');
         $pzt = new Targets($type);
-        $this->data['all-targets'] = $pzt->toArray();
+        $this->data->setVariable('all-targets', $pzt->toArray());
         $pzt = new Affiliations();
-        $this->data['all-institutions'] = $pzt->getAllInstitutions();
+        $this->data->setVariable('all-institutions', $pzt->getAllInstitutions());
         // fetch the selected data
-        $this->data['useroptions'] = $uo;
+        $this->data->setVariable('useroptions', $uo);
         return($this->data);
     }
 
@@ -121,14 +121,14 @@ class Pazpar2Controller extends SearchController
         $uo = new UserOptions($this->request);
         $type = $uo->getSessionData('source_type');
         $pzt = new Targets($type);
-        $this->data['all-targets'] = $pzt->toArray();
+        $this->data->setVariable('all-targets', $pzt->toArray());
         $pzt = new Affiliations();
-        $this->data['all-institutions'] = $pzt->getAllInstitutions();
+        $this->data->setVariable('all-institutions', $pzt->getAllInstitutions());
         // we need all subject data for lookups
         $s = new Subjects();
-        $this->data['all-subjects'] = $s->getSubjects();
+        $this->data->setVariable('all-subjects', $s->getSubjects());
         // fetch the selected data
-        $this->data['useroptions'] = $uo;
+        $this->data->setVariable('useroptions', $uo);
         return($this->data);
     }
 
@@ -139,11 +139,11 @@ class Pazpar2Controller extends SearchController
         $uo = new UserOptions($this->request);
         $type = $uo->getSessionData('source_type');
         $pzt = new Targets($type);
-        $this->data['all-targets'] = $pzt->toArray();
+        $this->data->setVariable('all-targets', $pzt->toArray());
         $pzt = new Affiliations();
-        $this->data['all-institutions'] = $pzt->getAllInstitutions();
+        $this->data->setVariable('all-institutions', $pzt->getAllInstitutions());
 
-        $this->data['useroptions'] = $uo;
+        $this->data->setVariable('useroptions', $uo);
         return($this->data);
     }
 
@@ -210,7 +210,7 @@ class Pazpar2Controller extends SearchController
     public function statusAction()
     {
         $uo = new UserOptions($this->request);
-        $this->data['useroptions'] = $uo;
+        $this->data->setVariable('useroptions', $uo);
         $sid = $uo->getSessionData('pz2session');
         $status = $this->engine->getSearchStatus($sid);
         // if status is finished, redirect to results
@@ -221,10 +221,10 @@ class Pazpar2Controller extends SearchController
             return $this->redirect()->toUrl($url);
         }
         
-        $targets = $uo->getSessionData('targets');
+        $target_keys = $uo->getSessionData('targets');
         $type = $uo->getSessionData('source_type');
-        $targets = new Targets($type, $targets);
-        $this->data['pz2results'] = $status->getTargetStatuses($targets);
+        $targets = new Targets($type, $target_keys);
+        $this->data->setVariable('pz2results', $status->getTargetStatuses($targets));
         // keep the session number in the output HTML for AJAX
         $this->request->setSessionData('pz2session', $sid);
 
@@ -263,8 +263,8 @@ class Pazpar2Controller extends SearchController
             $targets = $uo->getSessionData('targets');
             $type = $uo->getSessionData('source_type');
             $targets = new Targets($type, $targets);
-            $result['useroptions'] = $uo;
-            $result['targets'] = $targets->getTargetNames(); // needed for the facets
+            $result->setVariable('useroptions', $uo);
+            $result->setVariable('targets', $targets->getTargetNames()); // needed for the facets
             //$result['status'] = $status->getTargetStatuses($this->query->getTargets());
             //$result['externalLinks'] = $this->helper->addExternalLinks($this->config);
             return $result;
@@ -302,7 +302,7 @@ class Pazpar2Controller extends SearchController
         $this->helper->addRecordLinks($results); 
         $this->helper->addExternalRecordLinks($results, $this->config); 
         // add to response 
-        $this->data["results"] = $results;
+        $this->data->setVariable('results', $results);
         return $this->data; 
     }
 
