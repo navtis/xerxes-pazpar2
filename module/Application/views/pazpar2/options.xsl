@@ -124,7 +124,7 @@
         <div id="current-options">
             <h2>Options currently selected</h2>
             <ul>
-                <li><span class="title">Records to fetch:</span>
+                <li><span class="title">Records to fetch: </span>
                     <xsl:choose>
                         <xsl:when test="//pazpar2options/user-options/max_records">
                             <xsl:value-of select="//pazpar2options/user-options/max_records"/>
@@ -135,7 +135,7 @@
                     </xsl:choose>
                 </li>
                 <xsl:if test="//config/groupby/option[@id='access']">
-                    <li><span class="title">User affiliation:</span>
+                    <li><span class="title">User affiliation: </span>
                         <xsl:choose>
 				<xsl:when test="//pazpar2options/user-options/affiliation">
 					You are a <span style="font-style: italic"><xsl:value-of select="//pazpar2options/user-options/readable_role"/></span>
@@ -149,13 +149,13 @@
                         </xsl:choose>
                     </li>
                 </xsl:if>
-                <li><span class="title">Libraries selected:</span>
+                <li><span class="title">Libraries selected: </span>
                         <xsl:if test="//pazpar2options/user-options/source_type">
                             <xsl:value-of select="//config/sourcetype/option[@id=//pazpar2options/user-options/source_type]/@public"/> libraries, 
                         </xsl:if>
                     By <xsl:value-of select="//pazpar2options/user-options/selectedby"/>
                 </li>
-                <li><span class="title">Libraries in use:</span>
+                <li><span class="title">Libraries in use: </span>
 			<xsl:for-each select="//pazpar2options/user-options/targets/target">
                         <xsl:variable name="key" select="."/>
                         <xsl:value-of select="//all-targets/target[@target_id=$key]/display_name"/><xsl:if test="not(position() = last())">, </xsl:if>
@@ -185,8 +185,8 @@
                 <div>
                     <span style="float:left;">Faster search </span> <div id="slider" style="float:left; width: 10em; margin: 5px 10px 5px 12px;"></div> <span style="float:left;"> More results</span>
                 </div>
+                <input type="submit" name="records" value="Submit" style="margin-left: 1em; float: left"/>
                 <div style="clear:both"/>
-                <input type="submit" name="records" value="Submit"/>
             </form>
 
         </div>

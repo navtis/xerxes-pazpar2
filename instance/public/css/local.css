@@ -8,6 +8,42 @@
 
 /* @import url("/javascript/jquery/css/jquery-ui-1.8.16.custom.css") */
 
+
+#hd-banner {
+       background-color: #336699;
+       padding: 20px;
+       padding-bottom: 2px;
+       /* overflow: hidden; */
+       float: left;
+       width: 96%;
+}
+
+#hd-banner form {
+	float: left;
+}
+
+#hd-banner .raised-box {
+	margin-top: 1em;
+	background-color: white;
+}
+
+#hd-banner-link {
+      color: #fff;
+      font-weight: bold;
+     font-size: 150%;
+     font-family: Arial, Helvetica, sans-serif;
+     text-decoration: none;
+}
+
+#banner-logo{
+	float:right;
+	width: 300px;
+	height: 100px;
+	margin-right: 10px;
+	padding-bottom: 10px;
+}
+
+
 /* experimental additions for pazpar2 */
 
 /* info boxes for flashMessages */
@@ -51,6 +87,9 @@
 
 /* Options pages */
 
+.title {
+	font-weight: bold;
+}
 .set-option{
 	margin-top: 1em;
 }
