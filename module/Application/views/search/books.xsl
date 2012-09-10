@@ -36,8 +36,8 @@
 	
 		<xsl:if test="$is_mobile = 0">
 	
-			<link href="css/books.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
-			<script src="{$base_include}/javascript/sms.js" language="javascript" type="text/javascript"></script>
+			<link href="css/books.css?version={$asset_version}" rel="stylesheet" type="text/css" />
+			<script src="{$base_include}/javascript/sms.js?version={$asset_version}" language="javascript" type="text/javascript"></script>
 			
 		</xsl:if>
 		
@@ -68,7 +68,7 @@
 			
 			<!-- google javascript lookup -->
 			
-			<xsl:if test="is_mobile = 1">
+			<xsl:if test="$is_mobile = 0">
 			
 				<xsl:call-template name="google_preview" />
 				
@@ -108,6 +108,68 @@
 			<xsl:call-template name="save_record" />
 			
 		</div>
+	</xsl:template>
+	
+	<!--
+		TEMPLATE: RECORD AUTHORS TOP
+		Only show primary author here to satisfy a more catalog-ish design *sigh*
+	-->		
+	
+	<xsl:template name="record_authors_top">
+			
+		<xsl:if test="authors/author[@type = 'personal' and not(@additional)]">
+			<div>
+				<dt><xsl:copy-of select="$text_results_author" />:</dt>
+				<dd>
+					<a href="{url}">
+						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/aufirst" />
+						<xsl:text> </xsl:text>
+						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/auinit" />
+						<xsl:text> </xsl:text>
+						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/aulast" />
+					</a>
+				</dd>
+			</div>
+		</xsl:if>
+		
+	</xsl:template>	
+	
+	<!-- 
+		TEMPLATE RECORD AUTHORS BOTTOM
+		additional authors only 
+	-->
+	
+	<xsl:template name="record_authors_bottom">
+	
+		<xsl:if test="authors/author[@additional='true' and @type != 'corporate']">
+
+			<h2>Additional Authors</h2>
+			<ul>
+				<xsl:for-each select="authors/author[@additional='true']">
+					<li>
+						<a href="{url}">
+							<xsl:choose>
+								<xsl:when test="display">
+									<xsl:value-of select="display" />							
+								</xsl:when>
+								<xsl:when test="@type = 'personal'">
+									<xsl:value-of select="aufirst" />
+									<xsl:text> </xsl:text>
+									<xsl:value-of select="auinit" />
+									<xsl:text> </xsl:text>
+									<xsl:value-of select="aulast" />								
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="aucorp" />
+								</xsl:otherwise>
+							</xsl:choose>
+						</a>
+					</li>
+				</xsl:for-each>
+			</ul>
+
+		</xsl:if>
+	
 	</xsl:template>
 
 	<!-- 
@@ -194,7 +256,7 @@
 						
 						<xsl:if test="primary_author or publisher or year">
 							<div class="results-book-summary">
-								<xsl:if test="format/internal != 'JFULL'">
+								<xsl:if test="format/normalized != 'JFULL'">
 								
 									<!-- author -->
 									
@@ -347,11 +409,17 @@
 						<xsl:choose>
 						
 							<xsl:when test="../holdings[holdings|electronicResources]">
-							
+													
 								<xsl:call-template name="availability_lookup_holdings">
 									<xsl:with-param name="context" select="$context" />
 								</xsl:call-template>
 								
+							</xsl:when>
+							
+							<xsl:when test="../holdings/items/item/onOrder = '1'">
+							
+								<xsl:call-template name="availability_on_order" />
+							
 							</xsl:when>
 							
 							<xsl:when test="$type = 'summary'">
@@ -396,6 +464,23 @@
 		</xsl:choose>
 	
 	</xsl:template>
+
+	<!-- 	
+		TEMPLATE: AVAILABILITY ON ORDER
+		On order display, FTW!
+	-->
+	
+	<xsl:template name="availability_on_order">
+	
+		<div class="record-action books-availability-missing">
+			<xsl:call-template name="img_book_not_available">
+				<xsl:with-param name="class">mini-icon</xsl:with-param>
+			</xsl:call-template>
+			<xsl:text> </xsl:text>
+			<xsl:value-of select="../holdings/items/item/note" />
+		</div>	
+	
+	</xsl:template>
 	
 	<!-- 	
 		TEMPLATE: NO LOOKUP
@@ -418,6 +503,7 @@
 		<xsl:param name="printAvailable" />	
 		
 		<xsl:choose>
+			
 			<xsl:when test="../holdings/items/item and $printAvailable = '0'">
 			
 				<div class="record-action books-availability-missing">
@@ -466,9 +552,7 @@
 	-->
 	
 	<xsl:template name="availability_lookup_holdings">
-		
 		<xsl:param name="context">record</xsl:param>
-	
 		
 		<xsl:if test="links">
 	
@@ -500,7 +584,7 @@
 		</xsl:if>
 		
 		<xsl:if test="../holdings/holdings">
-	
+		
 			<p><strong>Print holdings</strong></p>
 		
 			<xsl:for-each select="../holdings/holdings/holding">
@@ -598,7 +682,7 @@
 			<xsl:if test="../url_open">
 		
 				<div class="results-availability">
-					<a target="{$link_target}" href="{../url_open}" class="record-action">
+					<a target="{$link_target}" href="{../url_open}" class="record-action" data-role="button">
 						<img src="{$image_sfx}" alt="" border="0" class="mini-icon link-resolver-link "/>
 						<xsl:text> </xsl:text>
 						<xsl:copy-of select="$text_link_resolver_check" /> 
@@ -617,7 +701,7 @@
 
 	<xsl:template name="sms_option">
 		
-		<xsl:if test="count(../holdings/items/item) &gt; 0">
+		<xsl:if test="count(../holdings/items/item[not(onOrder)]) &gt; 0 and $is_mobile = 0">
 		
 			<div id="sms-option" class="results-availability record-action">
 	

@@ -167,6 +167,13 @@ abstract class SearchController extends ActionController
 			$max = $this->max_allowed;
 		}
 		
+		// keep search refinements, if not set by user already and so configured 
+		
+		if ( $this->request->getSessionData('clear_facets') == '' && $this->config->getConfig('KEEP_SEARCH_REFINEMENT', false, false) )
+		{
+			$this->request->setSessionData('clear_facets', 'false');
+		}
+		
 		// search
 				
 		$results = $this->engine->searchRetrieve($this->query, $start, $max, $internal_sort);
@@ -245,6 +252,11 @@ abstract class SearchController extends ActionController
 		// get the record
 
 		$results = $this->engine->getRecord($id);
+		
+		if ( $this->request->getParam('original') != null || $this->config->getConfig('INCLUDE_ORIGINAL_RECORD', false) )
+		{
+			$results->getRecord(0)->includeOriginalRecord();
+		}
 		
 		// set links
 		

@@ -532,9 +532,31 @@ class Record
 		{
 			$strKev .= $param_delimiter . "rfr_id=info:sid/" . urlencode( $strReferer );
 		}
+		
+		// search engine and database
+		
+		$source = '';
+		
+		if ( $this->source != "" )
+		{
+			$source = $this->source;
+			
+			if ( $this->database_name != "" )
+			{
+				$source .= ":";
+			}
+		}
+		
 		if ( $this->database_name != "" )
 		{
-			$strKev .= urlencode( " ( " . $this->database_name . ")" );
+			$source .= $this->database_name;
+		}
+		
+		$source = trim($source);
+		
+		if ( $source != '' )
+		{
+			$strKev .= urlencode( "($source)" );
 		}
 		
 		// add rft_id's
@@ -782,62 +804,38 @@ class Record
 			
 		if ( count($this->authors) > 0 )
 		{
-			$objAuthors = $objXml->createElement("authors");
+			$authors_xml = $objXml->createElement("authors");
 			$x = 1;
 			
-			foreach ( $this->authors as $objXerxesAuthor )
+			foreach ( $this->authors as $author )
 			{
-				$objAuthor =  $objXml->createElement("author");
-				$objAuthor->setAttribute("type", $objXerxesAuthor->type);
+				$author_xml =  $objXml->createElement("author");
+				$author_xml->setAttribute("type", $author->type);
 				
-				if ( $objXerxesAuthor->additional == true )
+				if ( $author->additional == true )
 				{
-					$objAuthor->setAttribute("additional", "true");
+					$author_xml->setAttribute("additional", "true");
 				}
 
-				if ( $objXerxesAuthor->last_name != "" )
-				{					
-					$objAuthorLast =  $objXml->createElement("aulast", Parser::escapeXml( $objXerxesAuthor->last_name ) );
-					$objAuthor->appendChild($objAuthorLast);
-				}
-				
-				if ( $objXerxesAuthor->first_name != "" )
-				{
-					$objAuthorFirst =  $objXml->createElement("aufirst", Parser::escapeXml( $objXerxesAuthor->first_name ) );
-					$objAuthor->appendChild($objAuthorFirst);
-				}
-				
-				if ( $objXerxesAuthor->init != "" )
-				{
-					$objAuthorInit =  $objXml->createElement("auinit", Parser::escapeXml( $objXerxesAuthor->init) );
-					$objAuthor->appendChild($objAuthorInit);
-				}
-
-				if ( $objXerxesAuthor->name != "" )
-				{
-					$objAuthorCorp =  $objXml->createElement("aucorp", Parser::escapeXml( $objXerxesAuthor->name) );
-					$objAuthor->appendChild($objAuthorCorp);
-				}
-
-				if ( $objXerxesAuthor->display != "" )
-				{
-					$objAuthorDisplay = $objXml->createElement("display", Parser::escapeXml( $objXerxesAuthor->display) );
-					$objAuthor->appendChild($objAuthorDisplay);
-				}				
-				
-				$objAuthor->setAttribute("rank", $x);
+				$author_xml->setAttribute("rank", $x);
 				
 				if ( $x == 1 && $this->editor == true )
 				{
-					$objAuthor->setAttribute("editor", "true");
+					$author_xml->setAttribute("editor", "true");
 				}
 				
-				$objAuthors->appendChild($objAuthor);
+				foreach ( $author->toArray() as $key => $value )
+				{
+					$objNew = $objXml->createElement($key, Parser::escapeXml( $value ) );
+					$author_xml->appendChild($objNew);
+				}
+				
+				$authors_xml->appendChild($author_xml);
 				
 				$x++;
 			}
 			
-			$objXml->documentElement->appendChild($objAuthors);
+			$objXml->documentElement->appendChild($authors_xml);
 		}		
 	
 		// standard numbers
@@ -896,7 +894,7 @@ class Record
 				continue;
 			}
 			
-			// these we handled these above
+			// we handled these above
 			
 			if ($key == "authors" || 
 				$key == "isbns" ||
@@ -1338,8 +1336,7 @@ class Record
 	
 	/**
 	 * Return authors.  Authors will return as array, with each author name optionally formatted
-	 * as a string ('first last' or 'last, first') or as an associative array in parts, based on
-	 * paramaters listed below.
+	 * as a string ('first last' or 'last, first') or objects
 	 *
 	 * @param bool $bolPrimary		[optional] return just the primary author, default false
 	 * @param bool $bolFormat		[optional] return the author names as strings (otherwise as objects), default false
@@ -1351,49 +1348,17 @@ class Record
 	{
 		$arrFinal = array();
 		
-		foreach ( $this->authors as $objXerxesAuthor )
+		foreach ( $this->authors as $author )
 		{
 			// author as string
 			
 			if ( $bolFormat == true )
 			{
-				$strAuthor = ""; // author name formatted
-
-				$strFirst = $objXerxesAuthor->first_name;
-				$strLast = $objXerxesAuthor->last_name;
-				$strInit = $objXerxesAuthor->init;
-				$strName = $objXerxesAuthor->name;
-				
-				if ( $strName != "" )
-				{
-					$strAuthor = $strName;
-				} 
-				else
-				{
-					if ( $bolReverse == false )
-					{
-						$strAuthor = $strFirst . " ";
-						
-						if ( $strInit != "" )
-						{
-							$strAuthor .= $strInit . " ";
-						}
-						
-						$strAuthor .= $strLast;
-					} 
-					else
-					{
-						$strAuthor = $strLast . ", " . $strFirst . " " . $strInit;
-					}
-				}
-				
-				array_push( $arrFinal, $strAuthor );
+				array_push( $arrFinal, $author->getName($bolReverse) );
 			} 
-			else
+			else // author objects
 			{
-				// author objects
-				
-				array_push( $arrFinal, $objXerxesAuthor );
+				array_push( $arrFinal, $author );
 			}
 			
 			// we're only asking for the primary author
@@ -1402,14 +1367,13 @@ class Record
 			{
 				// sorry, only additional authors (7XX), so return empty
 				
-				if ( $objXerxesAuthor->additional == true )
+				if ( $author->additional == true )
 				{
 					return array();
 				}
 				else
 				{
-					// exit loop, we've got the author we need
-					break;
+					break; // exit loop, we've got the author we need
 				}
 			}
 		}

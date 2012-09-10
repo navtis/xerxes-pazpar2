@@ -575,32 +575,39 @@
 	
 	<xsl:template name="search_sidebar_facets">
 			
-		<xsl:if test="//facets/groups[not(display)]">
-		
 			<div class="box">
 			
 				<xsl:call-template name="facet_narrow_results" />
 				
-				<xsl:for-each select="//facets/groups/group[not(display)]">
+				<xsl:if test="//facets/groups[not(display)]">
+				
+					<xsl:for-each select="//facets/groups/group[not(display)]">
+
+						<!-- only show the facets if there is more than one -->
+	
+						<xsl:if test="count(facets/facet) &gt; 1">
+			
+							<h3><xsl:value-of select="public" /></h3>
+							
+							<xsl:choose>
+								<xsl:when test="facets/facet/is_date">
+									<xsl:call-template name="facet_dates" />
+								</xsl:when>
+								<xsl:when test="//config/facet_multiple = 'true'">
+									<xsl:call-template name="facet_multiple" />
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:call-template name="facet_links" />
+								</xsl:otherwise>
+							</xsl:choose>
+							
+						</xsl:if>
 		
-					<h3><xsl:value-of select="public" /></h3>
-					
-					<xsl:choose>
-						<xsl:when test="facets/facet/is_date">
-							<xsl:call-template name="facet_dates" />
-						</xsl:when>
-						<xsl:when test="//config/facet_multiple = 'true'">
-							<xsl:call-template name="facet_multiple" />
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:call-template name="facet_links" />
-						</xsl:otherwise>
-					</xsl:choose>
-		
-				</xsl:for-each>
+					</xsl:for-each>
+				
+				</xsl:if>
+			
 			</div>
-		
-		</xsl:if>
 	
 	</xsl:template>
 	
@@ -1012,7 +1019,7 @@
 				<!-- link resolver, full-text predetermined -->
 				
 				<xsl:when test="$link_resolver_allowed = 'true' and subscription = 1">
-						<a href="{../url_open}&amp;fulltext=1" target="{$link_target}" class="record-action link-resolver-link">
+						<a href="{../url_open}&amp;fulltext=1" target="{$link_target}" class="record-action link-resolver-link" data-role="button">
 							<xsl:call-template name="img_format_html">
 								<xsl:with-param name="class">mini-icon link-resolver-link</xsl:with-param>
 							</xsl:call-template>
@@ -1024,7 +1031,7 @@
 				<!-- link resolver, no full-text predetermined -->
 				
 				<xsl:when test="$link_resolver_allowed = 'true'">
-						<a href="{../url_open}" target="{$link_target}" class="record-action link-resover-link">
+						<a href="{../url_open}" target="{$link_target}" class="record-action link-resover-link" data-role="button">
 							<img src="{$image_sfx}" alt="" class="mini-icon link-resover-link "/>
 							<xsl:text> </xsl:text>
 							<xsl:copy-of select="$text_link_resolver_check" />
@@ -1249,7 +1256,7 @@
 			
 			<div class="record-action {@type}">
 								
-				<a href="{url}" target="{$link_target}">
+				<a href="{url}" target="{$link_target}" data-role="button">
 				
 					<xsl:choose>
 						<xsl:when test="@format = 'pdf'">

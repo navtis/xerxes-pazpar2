@@ -98,7 +98,59 @@ class Author
 		{
 			$this->display = $author_display;
 		}
-	}			
+	}
+	
+	/**
+	 * Get formatted author name
+	 * 
+	 * @param bool $bolReverse     [optional] reverse personal names as last, first
+	 * @return string
+	 */
+	
+	public function getName($bolReverse = false)
+	{
+		// corporate name
+		
+		if ( $this->name != "" )
+		{
+			return $this->name;
+		}
+		
+		else // personal name
+		{
+			$name = ""; // author name formatted
+			
+			// last, first init
+			
+			if ( $bolReverse == true )
+			{
+				$name = $this->last_name;
+
+				if ( $this->first_name != '' )
+				{
+					$name .= ", " . $this->first_name;
+				}
+				
+				if ( $this->init != '' )
+				{
+					$name .= " " . $this->init;
+				}
+			}
+			else // first init last
+			{
+				$name = $this->first_name . " ";
+		
+				if ( $this->init != "" )
+				{
+					$name .= $this->init . " ";
+				}
+		
+				$name .= $this->last_name;
+			}
+			
+			return trim($name);
+		}
+	}
 	
 	/**
 	 * Get all fields
@@ -119,6 +171,44 @@ class Author
 		}
 		
 		return trim($values);
+	}
+	
+	/**
+	 * Serialize object to array 
+	 */
+	
+	public function toArray()
+	{
+		$convert = array(
+			'last_name' => 'aulast',
+			'first_name' => 'aufirst',
+			'init' => 'auinit',
+			'name' => 'aucorp',
+			'display' => 'display'
+		);
+		
+		$final = array();
+		
+		// take each property above, but convert the name to the converted (OpenURL-ish) name
+		
+		foreach ($this as $key => $value)
+		{
+			if ( $value == '')
+			{
+				continue;
+			}
+			
+			if ( array_key_exists($key, $convert))
+			{
+				$final[$convert[$key]] = $value;
+			}
+			else
+			{
+				$final[$key] = $value;
+			}
+		}
+		
+		return $final;
 	}
 	
 	/**

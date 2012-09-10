@@ -145,7 +145,7 @@ class Format
 	
 	public function toOpenURLGenre()
 	{
-		switch ( $this->internal )
+		switch ( $this->normalized )
 		{
 			case self::Journal :
 			case self::Serial :
@@ -156,7 +156,8 @@ class Format
 			case self::ArticleElectronic :
 			case self::ArticleJournal :				
 			case self::ArticleMagazine :
-			case self::ArticleNewspaper :			
+			case self::ArticleNewspaper :
+			case self::Article :		
 				
 				return "article";
 				break;
@@ -236,7 +237,8 @@ class Format
 	
 	public function determineFormat($data_fields)
 	{
-		$this->setFormat($this->extractFormat($data_fields));
+		$format = $this->extractFormat($data_fields);
+		$this->setFormat($format);
 	}	
 	
 	/**
@@ -302,7 +304,7 @@ class Format
 	
 	public function getReadableConstName($value)
 	{
-		switch ($value)
+		switch ( $this->getConstNameForValue($value) )
 		{
 			case 'ArticleElectronic': 
 				return 'Article'; break;

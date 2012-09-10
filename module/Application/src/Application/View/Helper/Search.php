@@ -8,6 +8,8 @@ use Application\Model\Search\Engine,
 	Application\Model\Search\Query,
 	Application\Model\Search\Spelling\Suggestion,
 	Xerxes\Record,
+	Xerxes\Record\Author,
+	Xerxes\Record\Subject,
 	Xerxes\Utility\Parser,
 	Xerxes\Utility\Request,
 	Xerxes\Utility\Registry,
@@ -89,7 +91,7 @@ class Search
 			return null;
 		}
 		
-		$objXml = Parser::convertToDOMDocument( "<pager />" );
+		$xml = Parser::convertToDOMDocument( "<pager />" );
 		
 		$base_record = 1; // starting record in any result set
 		$page_number = 1; // starting page number in any result set
@@ -137,16 +139,16 @@ class Search
 			
 			if ( $bolShowFirst == true )
 			{
-				$objPage = $objXml->createElement( "page", "1" );
+				$page = $xml->createElement( "page", "1" );
 				
 				$params = $this->currentParams();
 				$params["start"] = 1;
 				
 				$link = $this->request->url_for( $params );
 				
-				$objPage->setAttribute( "link", Parser::escapeXml( $link ) );
-				$objPage->setAttribute( "type", "first" );
-				$objXml->documentElement->appendChild( $objPage );
+				$page->setAttribute( "link", Parser::escapeXml( $link ) );
+				$page->setAttribute( "type", "first" );
+				$xml->documentElement->appendChild( $page );
 			}
 			
 			// create pages and links
@@ -157,22 +159,21 @@ class Search
 				{
 					if ( $current_page == $page_number )
 					{
-						$objPage = $objXml->createElement( "page", $page_number );
-						$objPage->setAttribute( "here", "true" );
-						$objXml->documentElement->appendChild( $objPage );
+						$page = $xml->createElement( "page", $page_number );
+						$page->setAttribute( "here", "true" );
+						$xml->documentElement->appendChild( $page );
 					} 
 					else
 					{
-						$objPage = $objXml->createElement( "page", $page_number );
+						$page = $xml->createElement( "page", $page_number );
 						
 						$params = $this->currentParams();
 						$params["start"] = $base_record;
 						
 						$link = $this->request->url_for( $params );
 						
-						$objPage->setAttribute( "link", Parser::escapeXml( $link ) );
-						$objXml->documentElement->appendChild( $objPage );
-					
+						$page->setAttribute( "link", Parser::escapeXml( $link ) );
+						$xml->documentElement->appendChild( $page );
 					}
 				}
 				
@@ -184,20 +185,20 @@ class Search
 			
 			if ( $next <= $total )
 			{
-				$objPage = $objXml->createElement( "page", "" ); // element to hold the text_results_next label
+				$page = $xml->createElement( "page", "" ); // element to hold the text_results_next label
 				
 				$params = $this->currentParams();
 				$params["start"] =  $next;
 				
 				$link = $this->request->url_for( $params );
 				
-				$objPage->setAttribute( "link", Parser::escapeXml( $link ) );
-				$objPage->setAttribute( "type", "next" );
-				$objXml->documentElement->appendChild( $objPage );
+				$page->setAttribute( "link", Parser::escapeXml( $link ) );
+				$page->setAttribute( "type", "next" );
+				$xml->documentElement->appendChild( $page );
 			}
 		}
 		
-		return $objXml;
+		return $xml;
 	}
 	
 	/**
@@ -265,6 +266,20 @@ class Search
 		foreach ( $results->getRecords() as $result )
 		{
 			$xerxes_record = $result->getXerxesRecord();
+			
+			// author links
+			
+			foreach ( $xerxes_record->getAuthors() as $author )
+			{
+				$author->url = $this->linkAuthor($author);
+			}
+			
+			// subject links
+			
+			foreach ( $xerxes_record->getSubjects() as $subject )
+			{
+				$subject->url = $this->linkSubject($subject);
+			}			
 			
 			// full-record link
 			
@@ -545,12 +560,12 @@ class Search
 	 * @return string url
 	 */
 	
-	public function linkFullRecord( Record $result )
+	public function linkFullRecord( Record $record )
 	{
 		$arrParams = array(
 			'controller' => $this->request->getParam('controller'),
 			"action" => "record",
-			"id" => $result->getRecordID()
+			"id" => $record->getRecordID()
 		);
 		
 		return $this->request->url_for($arrParams);
@@ -559,16 +574,16 @@ class Search
 	/**
 	 * URL for the full record display
 	 * 
-	 * @param Record $result
+	 * @param Record $record
 	 * @return string url
 	 */
 	
-	public function linkSaveRecord( Record $result )
+	public function linkSaveRecord( Record $record )
 	{
 		$arrParams = array(
 			'controller' => $this->request->getParam('controller'),
 			"action" => "save",
-			"id" => $result->getRecordID()
+			"id" => $record->getRecordID()
 		);
 		
 		return $this->request->url_for($arrParams);
@@ -577,26 +592,63 @@ class Search
 	/**
 	 * URL for the sms feature
 	 * 
-	 * @param Record $result
+	 * @param Record $record
 	 * @return string url
 	 */	
 	
-	public function linkSMS( Record $result )
+	public function linkSMS( Record $record )
 	{
 		$arrParams = array(
 			'controller' => $this->request->getParam('controller'),
 			"action" => "sms",
-			"id" => $result->getRecordID()
+			"id" => $record->getRecordID()
 		);
 		
 		return $this->request->url_for($arrParams);	
 	}
+	
+	/**
+	 * URL for author
+	 *
+	 * @param Author $author
+	 * @return string url
+	 */
+	
+	public function linkAuthor( Author $author )
+	{
+		$arrParams = array(
+				'controller' => $this->request->getParam('controller'),
+				'action' => 'search',
+				'field' => 'author',
+				'query' => $author->getName(),
+		);
+	
+		return $this->request->url_for($arrParams);
+	}	
+	
+	/**
+	 * URL for Subject
+	 *
+	 * @param Subject $subject
+	 * @return string url
+	 */
+	
+	public function linkSubject( Subject $subject )
+	{
+		$arrParams = array(
+				'controller' => $this->request->getParam('controller'),
+				'action' => 'search',
+				'query' => $subject->value,
+				'field' => 'subject'
+		);
+	
+		return $this->request->url_for($arrParams);
+	}	
 
 	/**
-	 * Other links for the record beyond those supplied by the framework,
-	 * such as lateral subject or author links
+	 * Other links for the record beyond those supplied by the framework
 	 * 
-	 * @param Xerxes_Model_Search_Result $result 
+	 * @param Result $result 
 	 */	
 	
 	public function linkOther( Result $result )

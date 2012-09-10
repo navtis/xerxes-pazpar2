@@ -53,7 +53,7 @@
 	</xsl:variable>
 	
 	
-	<xsl:variable name="xerxes_version" select="//config/xerxes_version" />
+	<xsl:variable name="asset_version" select="//config/asset_version" />
 
 	<xsl:variable name="link_target" select="//config/link_target" />
 
@@ -229,7 +229,7 @@
 	
 	<xsl:template name="surround_head">
 		<head>
-		<title><xsl:value-of select="//config/application_name" />: <xsl:call-template name="title" /></title>
+		<title><xsl:call-template name="title" /> | <xsl:value-of select="//config/application_name" /></title>
 		<xsl:call-template name="surround_meta" />
 		
 		<!-- jquery mobile adds its own base tag, so we don't here; weird, I know -->
@@ -405,15 +405,15 @@
 				<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 				<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
 				
-				<link href="{$base_include}/css/xerxes-mobile.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
-				<link href="{$base_url}/css/local-mobile.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
+				<link href="{$base_include}/css/xerxes-mobile.css?version={$asset_version}" rel="stylesheet" type="text/css" />	
+				<link href="{$base_url}/css/local-mobile.css?version={$asset_version}" rel="stylesheet" type="text/css" />	
 
 			</xsl:when>
 			<xsl:otherwise>
 				
-				<link href="{$base_include}/css/reset-fonts-grids.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
-				<link href="{$base_include}/css/xerxes-blue.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />
-				<link href="css/local.css?xerxes_version={$xerxes_version}" rel="stylesheet" type="text/css" />	
+				<link href="{$base_include}/css/reset-fonts-grids.css?version={$asset_version}" rel="stylesheet" type="text/css" />
+				<link href="{$base_include}/css/xerxes-blue.css?version={$asset_version}" rel="stylesheet" type="text/css" />
+				<link href="css/local.css?version={$asset_version}" rel="stylesheet" type="text/css" />	
 				
 			</xsl:otherwise>
 		</xsl:choose>
@@ -575,7 +575,7 @@
 	
 		<script src="{$base_include}/javascript/jquery/jquery-1.6.2.min.js" language="javascript" type="text/javascript"></script>
 		
-		<script src="{$base_include}/javascript/results.js" language="javascript" type="text/javascript"></script>
+		<script src="{$base_include}/javascript/results.js?version={$asset_version}" language="javascript" type="text/javascript"></script>
 
 	</xsl:template>
 		
@@ -586,7 +586,7 @@
 	
 	<xsl:template name="jslabels">
 	
-		<script language="javascript" type="text/javascript" src="asset/labels"></script> 
+		<script language="javascript" type="text/javascript" src="asset/labels?version={$asset_version}"></script> 
 	
 	</xsl:template>
 	
@@ -626,7 +626,9 @@
 -->
 
 <xsl:variable name="app_mini_icon_url">images/famfamfam/page_find.png</xsl:variable>
-<xsl:variable name="image_sfx">images/sfx.gif</xsl:variable>
+<xsl:variable name="image_sfx">
+	<xsl:value-of select="$base_url" /><xsl:text>/images/sfx.gif</xsl:text>
+</xsl:variable>
 <xsl:variable name="img_src_original_record">images/famfamfam/link.png</xsl:variable>
 <xsl:variable name="img_src_holdings">images/book.gif</xsl:variable>
 <xsl:variable name="img_src_chain">images/famfamfam/link.png</xsl:variable>
@@ -642,7 +644,7 @@
 </xsl:template>
 
 <xsl:template name="img_refereed">
-	<img src="images/refereed_hat.gif" width="20" height="14" alt="" />
+	<img src="{$base_url}/images/refereed_hat.gif" width="20" height="14" alt="" />
 </xsl:template>
 
 <xsl:template name="img_save_record">
@@ -734,21 +736,21 @@
 	<xsl:param name="alt" />
 	<xsl:param name="title" />
 	<xsl:param name="class" />
-	<img src="images/pdf.gif" width="16" height="16" border="0" alt="{$alt}" title="{$title}" class="{$class}" />
+	<img src="{$base_url}/images/pdf.gif" width="16" height="16" border="0" alt="{$alt}" title="{$title}" class="{$class}" />
 </xsl:template>
 
 <xsl:template name="img_format_html">
 	<xsl:param name="alt" />
 	<xsl:param name="title" />
 	<xsl:param name="class" />
-	<img src="images/html.gif" width="16" height="16" border="0" alt="{$alt}" title="{$title}" class="{$class}" />
+	<img src="{$base_url}/images/html.gif" width="16" height="16" border="0" alt="{$alt}" title="{$title}" class="{$class}" />
 </xsl:template>
 
 <xsl:template name="img_format_unknown">
 	<xsl:param name="alt" />
 	<xsl:param name="title" />
 	<xsl:param name="class" />
-	<img src="images/html.gif" width="16" height="16" border="0" alt="{$alt}" title="{$title}" class="{$class}" />
+	<img src="{$base_url}/images/html.gif" width="16" height="16" border="0" alt="{$alt}" title="{$title}" class="{$class}" />
 </xsl:template>
 
 <xsl:template name="img_databases_subject_hint_restricted">
