@@ -249,13 +249,12 @@ class Xsl
 		
 		
 		### now the actual mechanics of the import
-		
 		foreach ( $files_to_import as $import )
 		{
 			$this->addImportReference ( $generated_xsl, $import, $output );
 		}
 		
-		// header("Content-type: text/xml"); echo $generated_xsl->saveXML(); exit;
+		//header("Content-type: text/xml"); echo $generated_xsl->saveXML(); exit;
 		
 		return $generated_xsl;
 	}

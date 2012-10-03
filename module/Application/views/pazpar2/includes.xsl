@@ -6,7 +6,6 @@
 
 
 <xsl:import href="../includes.xsl" />
-<xsl:import href="eng.xsl" />
 
 <xsl:template name="error-message">
 	<xsl:param name="msg"/>

@@ -116,7 +116,7 @@
 	-->		
 	
 	<xsl:template name="record_authors_top">
-			
+
 		<xsl:if test="authors/author[@type = 'personal' and not(@additional)]">
 			<div>
 				<dt><xsl:copy-of select="$text_results_author" />:</dt>

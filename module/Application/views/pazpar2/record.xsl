@@ -16,9 +16,8 @@
 	xmlns:php="http://php.net/xsl" exclude-result-prefixes="php">
 
 <xsl:import href="../search/record.xsl" />
-<xsl:import href="../search/books.xsl" />
-<xsl:import href="includes.xsl" />
-<xsl:import href="eng.xsl" />
+<xsl:import href="../search/books.xsl" />  
+<xsl:import href="includes.xsl" /> 
 
 <xsl:output method="html" />
 
@@ -71,6 +70,10 @@
     <!--
        TEMPLATE: OVERRIDE SEARCH/RECORD/RECORD AUTHORS TO ADD TITLE-RESPONSIBILITY
     -->
+  <xsl:template name="record_authors_top"> 
+	  <xsl:call-template name="record_authors" /> <!-- Authors --> 
+	  <xsl:call-template name="record_corp_authors" /> <!-- Corp. Authors --> 
+  </xsl:template>
 
     <xsl:template name="record_authors">
         <xsl:choose>
@@ -153,6 +156,19 @@
         </div> 
     </xsl:template>
 
+    <!-- TEMPLATE: RECORD SUBJECTS --> 
+    <xsl:template name="record_subjects"> 
+	    <xsl:if test="subjects"> 
+		    <h2><xsl:copy-of select="$text_record_subjects" />:</h2> 
+		    <ul> 
+			<xsl:for-each select="subjects/subject"> 
+				    <li><xsl:value-of select="display" />
+				    </li> 
+	    		</xsl:for-each> 
+		</ul> 
+	   </xsl:if> 
+   </xsl:template> 
+
 	<!--
 		TEMPLATE: RECORD GENRES
 	-->
@@ -211,9 +227,9 @@
 	    </xsl:if>
         <div id="record-full-text" class="raised-box record-actions">
         <xsl:for-each select="//mergedHolding/holdings">
-            <xsl:call-template name="availability">
+	    <xsl:call-template name="availability">
                 <xsl:with-param name="context">record</xsl:with-param>
-            </xsl:call-template>
+	    </xsl:call-template> 
         </xsl:for-each>
 
 <!--            <xsl:call-template name="save_record" /> -->

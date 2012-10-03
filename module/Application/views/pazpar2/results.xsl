@@ -30,7 +30,7 @@
 	xmlns:php="http://php.net/xsl" exclude-result-prefixes="php">
 
 	<xsl:import href="../search/results.xsl" />
-	<xsl:import href="includes.xsl" />
+	<xsl:import href="includes.xsl" /> 
 
     <!-- override javascript-include from ../includes.xsl GS -->
     <xsl:template name="javascript_include"> 
