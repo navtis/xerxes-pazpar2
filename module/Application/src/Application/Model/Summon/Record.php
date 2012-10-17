@@ -12,7 +12,7 @@ use Xerxes,
  * @author David Walker
  * @copyright 2011 California State University
  * @link http://xerxes.calstate.edu
- * @license http://www.gnu.org/licenses/
+ * @license 
  * @version
  * @package Xerxes
  */
@@ -20,8 +20,10 @@ use Xerxes,
 class Record extends Xerxes\Record
 {
 	protected $source = "Summon";
+	protected $direct_link; // summon direct link
 	
-	private $original_array;
+	private $original_array; // main data from summon
+	private $config; // summon config
 
 	public function __sleep()
 	{
@@ -42,19 +44,44 @@ class Record extends Xerxes\Record
 		$this->cleanup();
 	}
 	
+	/**
+	 * Lazy load config object
+	 * 
+	 * @return Config
+	 */
+	
+	public function config()
+	{
+		if ( ! $this->config instanceof Config )
+		{
+			$this->config = Config::getInstance();
+		}
+		
+		return $this->config;
+	}
+	
 	public function getOpenURL($strResolver, $strReferer = null, $param_delimiter = "&")
 	{
-		// make sure the OpenURL source is always summon, not the publisher
-		// or other source where Summon has gotten its data
+		// only use openurls
 		
-		$source = $this->source;
-		$this->source = "Summon";
-		
-		$url = parent::getOpenURL($strResolver, $strReferer, $param_delimiter);
-		
-		$this->source = $source;
-	
-		return $url;
+		if ( $this->config()->getConfig('OPENURL_ONLY', false, false)  )
+		{
+			// make sure the OpenURL source is always summon, not the publisher
+			// or other source where Summon has gotten its data
+			
+			$source = $this->source;
+			$this->source = "Summon";
+				
+			$url = parent::getOpenURL($strResolver, $strReferer, $param_delimiter);
+				
+			$this->source = $source;
+			
+			return $url;
+		}
+		else // use the direct link from summon
+		{
+			return $this->direct_link;
+		}
 	}	
 	
 	protected function map($document)
@@ -105,13 +132,8 @@ class Record extends Xerxes\Record
 		$this->doi = $this->extractValue($document, "DOI/0");
 		
 		$openurl = $this->extractValue($document, "openUrl");
-		$direct_link = $this->extractValue($document, "link");
+		$this->direct_link = $this->extractValue($document, "link");
 		$uri = $this->extractValue($document, "URI/0");
-		
-		
-		// @todo: figure out black magic for direct linking
-		
-		// $this->links[] = new Xerxes\Record\Link($direct_link, Xerxes\Record\Link::ONLINE);
 		
 		// peer reviewed
 		
@@ -158,7 +180,12 @@ class Record extends Xerxes\Record
 		if ( array_key_exists('Notes', $document) )
 		{
 			$this->notes = $document['Notes'];
-		}			
+		}
+		
+		if ( array_key_exists('Genre', $document) )
+		{
+			$this->notes = $document['Genre'];
+		}		
 		
 		// authors
 		
@@ -338,4 +365,13 @@ class Record extends Xerxes\Record
 		return Format::Unknown;
 	}
 	
+	public function getOriginalXML($bolString = false)
+	{
+		// convert original (JSON-based) array to xml
+		
+		$this->document = Parser::convertToDOMDocument('<original />');
+		Parser::addToXML($this->document, 'record', $this->original_array);
+		
+		return parent::getOriginalXML($bolString);
+	}
 }

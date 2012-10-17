@@ -190,7 +190,10 @@ class Engine extends Search\Engine
 			
 			foreach ( $search->getLimits(true) as $limit )
 			{
-				array_push($databases, $limit->value);
+				if ( $limit->field == "database")
+				{
+					array_push($databases, $limit->value);
+				}
 			}
 			
 			// nope
@@ -248,6 +251,25 @@ class Engine extends Search\Engine
 		// load it in
 		
 		$xml = Parser::convertToDOMDocument($response);
+		
+		// catch a non-xml response
+		
+		if ( $xml->documentElement == null )
+		{
+			throw new \Exception("Could not connect to Ebsco search server");
+		}
+		
+		// check for fatal error
+		
+		if ( $xml->documentElement->nodeName == 'Fault')
+		{
+			$message = $xml->getElementsByTagName('Message')->item(0);
+			
+			if ( $message != null )
+			{
+				throw new \Exception('Ebsco server error: ' . $message->nodeValue);
+			}
+		}
 		
 		// result set
 		

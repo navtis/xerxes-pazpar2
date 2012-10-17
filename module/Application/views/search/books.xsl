@@ -36,7 +36,7 @@
 	
 		<xsl:if test="$is_mobile = 0">
 	
-			<link href="css/books.css?version={$asset_version}" rel="stylesheet" type="text/css" />
+			<link href="{$base_include}/css/books.css?version={$asset_version}" rel="stylesheet" type="text/css" />
 			<script src="{$base_include}/javascript/sms.js?version={$asset_version}" language="javascript" type="text/javascript"></script>
 			
 		</xsl:if>
@@ -121,7 +121,7 @@
 			<div>
 				<dt><xsl:copy-of select="$text_results_author" />:</dt>
 				<dd>
-					<a href="{url}">
+					<a href="{authors/author/url}">
 						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/aufirst" />
 						<xsl:text> </xsl:text>
 						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/auinit" />
@@ -422,7 +422,7 @@
 							
 							</xsl:when>
 							
-							<xsl:when test="$type = 'summary'">
+							<xsl:when test="$type = 'summary' or ($context = 'results' and $totalCopies &gt; 6)">
 							
 								<xsl:call-template name="availability_lookup_summary">
 									<xsl:with-param name="totalCopies" select="$totalCopies" />
@@ -659,7 +659,12 @@
 						<td><xsl:value-of select="institution" /></td>
 					</xsl:if>
 					<td><xsl:value-of select="location" /></td>
-					<td><xsl:value-of select="callnumber" /></td>
+					<td>
+						<xsl:value-of select="callnumber" />
+						<xsl:if test="volume">
+							<xsl:text> </xsl:text><xsl:value-of select="volume" />
+						</xsl:if>
+					</td>
 					<td><xsl:value-of select="status" /></td>
 				</tr>
 			</xsl:for-each>

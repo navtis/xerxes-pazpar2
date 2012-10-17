@@ -65,7 +65,11 @@
 	
 		<!-- search box area -->
 		
+		<xsl:call-template name="search_promo" />
+		
 		<xsl:call-template name="searchbox" />
+		
+		<div style="clear:both"></div>
 		
 		<div>
 			<xsl:if test="config/use_tabs = 'true'">
@@ -172,7 +176,7 @@
 		</div>
 		
 		<div id="loading" style="display:none">
-			<img src="images/ajax-loader.gif" alt="" /> Updating results . . . 
+			<img src="{$base_url}/images/ajax-loader.gif" alt="" /> Updating results . . . 
 		</div>
 		
 		<div id="facet-selector" style="display:none; position:absolute; background-color: #fff">
@@ -257,6 +261,7 @@
 				<input type="hidden" name="lang" value="{//request/lang}" />
 			</xsl:if>
 			
+			<xsl:call-template name="searchbox_hidden_fields_module" />
 			<xsl:call-template name="searchbox_hidden_fields_local" />
 	
 			<xsl:if test="request/sort">
@@ -778,7 +783,7 @@
 		<xsl:for-each select="facets/facet[is_excluded]">
 			<li class="facet-selection facet-excluded">
 				<a href="{url}">
-					<img src="images/famfamfam/delete.png" alt="remove exlcuded facet" />
+					<img src="{$base_url}/images/famfamfam/delete.png" alt="remove exlcuded facet" />
 					<xsl:text> </xsl:text>
 					<span class="facet-excluded-text"><xsl:value-of select="name" /></span>
 				</a>
@@ -1019,7 +1024,7 @@
 				<!-- link resolver, full-text predetermined -->
 				
 				<xsl:when test="$link_resolver_allowed = 'true' and subscription = 1">
-						<a href="{../url_open}&amp;fulltext=1" target="{$link_target}" class="record-action link-resolver-link" data-role="button">
+						<a href="{../url_open}" target="{$link_target}" class="record-action link-resolver-link" data-role="button">
 							<xsl:call-template name="img_format_html">
 								<xsl:with-param name="class">mini-icon link-resolver-link</xsl:with-param>
 							</xsl:call-template>
@@ -1360,6 +1365,7 @@
 	
 	<xsl:template name="advanced_search_option" />
 	<xsl:template name="advanced_search" />
+	<xsl:template name="searchbox_hidden_fields_module" />
 	<xsl:template name="searchbox_hidden_fields_local" />
 	
 	<!-- additional record data overriden in templates -->
@@ -1371,5 +1377,6 @@
 	
 	<xsl:template name="search_recommendations" />
 	<xsl:template name="facet_narrow_results" />
+	<xsl:template name="search_promo" />
 	
 </xsl:stylesheet>

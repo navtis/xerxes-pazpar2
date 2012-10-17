@@ -71,6 +71,19 @@ class Result
 		{
 			$this->holdings->checked = true;
 		}
+		
+		// proxy links?
+		
+		$proxy_server = $this->registry->getConfig('PROXY_SERVER', false );
+		$should_proxy_links = $this->config->getConfig('SHOULD_PROXY', false, false );
+		
+		if ( $should_proxy_links )
+		{
+			foreach ( $this->xerxes_record->getLinks() as $link )
+			{
+				$link->addProxyPrefix($proxy_server);
+			}
+		}
 	}
 	
 	/**
@@ -160,6 +173,30 @@ class Result
 		
 		$this->holdings = $availability->getHoldings($id);
 		$this->holdings->checked = true;
+		
+		
+		// items not to cache
+		
+		$no_cache = $this->config->getConfig('LOCATIONS_NO_CACHE', false);
+		
+		if ( $no_cache != '' && $no_cache instanceof \SimpleXMLElement )
+		{
+			$locations = array();
+			
+			foreach ( $no_cache->location as $location )
+			{
+				$locations[] = (string) $location;
+			}
+			
+			foreach ( $this->holdings->getItems() as $item )
+			{
+				if (in_array($item->location, $locations) )
+				{
+					return $this;
+				}
+			}
+		}
+		
 		
 		// cache it for the future
 		
