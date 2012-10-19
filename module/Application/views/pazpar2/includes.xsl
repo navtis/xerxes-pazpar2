@@ -34,7 +34,7 @@
     <xsl:template name="session-data">
         <!-- see http://www.w3.org/TR/html5/elements.html#embedding-custom-non-visible-data-with-the-data-attributes -->
         <!-- this is used by javascript and not a real hidden field -->
-        <span id="pz2session" data-value="{//request/session/pz2session}" />
+	<span id="pz2session" data-value="{//request/session/pz2session}" data-completed="{//request/session/completed}" data-querystring="{//request/session/querystring}" />
     </xsl:template>
 
 	<xsl:template name="options_sidebar">

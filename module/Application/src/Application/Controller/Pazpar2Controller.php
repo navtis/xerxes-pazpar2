@@ -227,6 +227,26 @@ class Pazpar2Controller extends SearchController
         $this->data->setVariable('pz2results', $status->getTargetStatuses($targets));
         // keep the session number in the output HTML for AJAX
         $this->request->setSessionData('pz2session', $sid);
+        // do the same with the querystring
+        // FIXME must be a simple way to do this
+        $params = $this->query->getAllSearchParams();
+        $pairs=array();
+        foreach($params as $k => $v){
+            if (is_array($v))
+            {
+                foreach($v as $e) 
+                { 
+                    $pairs[] = "$k=$e"; 
+                } 
+            } 
+            else 
+            { 
+                $pairs[] = "$k=$v"; 
+            } 
+        } 
+        $query_string = implode('&amp;', $pairs);
+
+        $this->request->setSessionData('querystring', $query_string); 
 
         return $this->data;
     }
@@ -319,6 +339,51 @@ class Pazpar2Controller extends SearchController
             $response->setContent(json_encode($arr)); 
             return $response;
         }
+
+    /**
+     * Called repeatedly by AJAX from results page until session is finished.
+     *  Javascript then reloads results page, and resultsAction should
+     *  populate it with search results.
+     */
+     public function ajaxstatusAction()
+     {
+        $uo = new UserOptions($this->request);
+        $target_keys = $uo->getSessionData('targets');
+        $type = $uo->getSessionData('source_type');
+        $sid = $this->request->getParam("session");
+
+        // fetch the target statuses
+        $status = $this->engine->getSearchStatus($sid);
+        $mystatus = array();
+        $targets = new Targets($type, $target_keys);
+        $mystatus['pz2status'] = $status->getTargetStatuses($targets);
+
+        // tidy the array for the javascript to process
+        $mystatus['pz2status']['global'] = array();
+        $mystatus['pz2status']['global']['progress'] = $mystatus['pz2status']['progress'];
+        $mystatus['pz2status']['global']['finished'] = $mystatus['pz2status']['finished']==0?false:true;
+        
+        // remove redundant fields 
+        unset($mystatus['pz2status']['xml']);
+        unset($mystatus['pz2status']['finished']);
+        unset($mystatus['pz2status']['progress']);
+        
+        // if finished add redirect address if needed
+        if ($mystatus['pz2status']['global']['finished'] == true)
+        {
+            $params = $this->helper->searchRedirectParams();
+            $params['action'] = 'results';
+            $mystatus['pz2status']['global']['reload_url'] = $this->request->url_for($params);
+        }
+
+        // return results as json
+        $response = $this->getResponse();
+        $response->headers()->addHeaderLine("Content-type", "application/json");
+        $response->setContent(json_encode($mystatus));
+        //Debug::dump($response->getContent()); exit;
+        return $response;
+     }
+
 
         /**
         * Terminate a search early when the user has lost patience

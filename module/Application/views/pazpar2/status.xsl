@@ -40,12 +40,6 @@
 	</xsl:call-template>
     </xsl:template>
 
-    <!-- refresh to keep updating status -->
-    <xsl:template name="surround_meta">
-	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	    <meta http-equiv="refresh" content="1" />
-    </xsl:template>
-
     <xsl:template name="javascript_include"> 
 	<xsl:call-template name="jslabels" /> 
 	<script src="javascript/jquery/jquery-1.6.2.min.js" language="javascript" type="text/javascript"></script> 
