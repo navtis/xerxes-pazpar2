@@ -212,7 +212,22 @@ class Pazpar2Controller extends SearchController
         $uo = new UserOptions($this->request);
         $this->data->setVariable('useroptions', $uo);
         $sid = $uo->getSessionData('pz2session');
-        $status = $this->engine->getSearchStatus($sid);
+        try
+        {
+            $status = $this->engine->getSearchStatus($sid);
+        }
+        catch( \Exception $e)
+        {
+            $this->flashMessenger->addMessage('Error|Session timeout: ' . $e->getMessage());
+            // assume the session died - can't initialise a new one here
+            $this->engine->clearPazpar2Client( $sid );
+            $params = $this->query->getAllSearchParams();
+            $params['lang'] = $this->request->getParam('lang');
+            $params['controller'] = $this->request->getParam('controller');
+            $params['action'] = 'index';
+            $url = $this->request->url_for($params);
+            return $this->redirect()->toUrl($url);
+        }
         // if status is finished, redirect to results
         if ($status->isFinished() == 1)
         {
