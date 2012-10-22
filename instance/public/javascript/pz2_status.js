@@ -59,7 +59,7 @@ $(document).ready(function(){
                     for ( key in data.pz2status ) 
                     {
 			if (key == 'global')
-				next;
+				continue;
 
                         var target = data['pz2status'][key];
                         $('#status-'+target['name']+' > span').attr('class', target['class']);
