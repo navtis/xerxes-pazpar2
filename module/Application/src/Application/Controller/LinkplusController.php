@@ -2,6 +2,7 @@
 
 namespace Application\Controller;
 
+use Application\Model\Search\Availability\Innopac\Config;
 use Zend\Mvc\Controller\ActionController;
 
 class LinkplusController extends SolrController

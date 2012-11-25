@@ -658,7 +658,14 @@
 					<xsl:if test="institution">
 						<td><xsl:value-of select="institution" /></td>
 					</xsl:if>
-					<td><xsl:value-of select="location" /></td>
+					<td>
+						<xsl:value-of select="location" />
+						
+						<xsl:if test="request_url">
+							<xsl:text> </xsl:text>
+							[<a href="{request_url}">Request</a>]
+						</xsl:if>
+					</td>
 					<td>
 						<xsl:value-of select="callnumber" />
 						<xsl:if test="volume">
@@ -670,6 +677,36 @@
 			</xsl:for-each>
 			</table>
 		</div>
+		
+		<xsl:call-template name="availability_hold" />
+	
+	</xsl:template>
+	
+	<!-- 	
+		TEMPLATE: AVAILABILITY HOLD
+	-->	
+	
+	<xsl:template name="availability_hold">
+		
+		<xsl:if test="//request/action = 'record'">
+			
+			<xsl:choose>
+			
+				<!-- Recall -->
+		
+				<xsl:when test="not(//item/availability = '1') and //config/enable_recall = 'true'">
+					<p><strong><a href="{../holdings/hold_url}"><xsl:copy-of select="$text_results_record_recall" /></a></strong></p>
+				</xsl:when>
+				
+				<!-- Hold -->
+				
+				<xsl:when test="//config/enable_holds = 'true'">				
+					<p><strong><a href="{../holdings/hold_url}"><xsl:copy-of select="$text_results_record_hold" /></a></strong></p>
+				</xsl:when>
+				
+			</xsl:choose>
+			
+		</xsl:if>
 	
 	</xsl:template>
 	
@@ -684,10 +721,10 @@
 		
 		<xsl:if test="count(../holdings/items/item)">
 		
-			<xsl:if test="../url_open">
+			<xsl:if test="../url_open_redirect">
 		
 				<div class="results-availability">
-					<a target="{$link_target}" href="{../url_open}" class="record-action" data-role="button">
+					<a target="{$link_target}" href="{../url_open_redirect}" class="record-action" data-role="button">
 						<img src="{$image_sfx}" alt="" border="0" class="mini-icon link-resolver-link "/>
 						<xsl:text> </xsl:text>
 						<xsl:copy-of select="$text_link_resolver_check" /> 

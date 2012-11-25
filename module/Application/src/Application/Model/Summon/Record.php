@@ -4,6 +4,7 @@ namespace Application\Model\Summon;
 
 use Xerxes,
 	Xerxes\Record\Format,
+	Xerxes\Record\Link,
 	Xerxes\Utility\Parser;
 
 /**
@@ -20,10 +21,11 @@ use Xerxes,
 class Record extends Xerxes\Record
 {
 	protected $source = "Summon";
-	protected $direct_link; // summon direct link
 	
 	private $original_array; // main data from summon
 	private $config; // summon config
+	
+	protected $direct_link; // summon direct link
 
 	public function __sleep()
 	{
@@ -36,6 +38,12 @@ class Record extends Xerxes\Record
 		parent::__construct();
 		$this->load($this->serialized);
 	}	
+	
+	/**
+	 * Load, map, and clean-up record data from Summon
+	 *
+	 * @param array $document
+	 */	
 	
 	public function load($document)
 	{
@@ -60,34 +68,33 @@ class Record extends Xerxes\Record
 		return $this->config;
 	}
 	
-	public function getOpenURL($strResolver, $strReferer = null, $param_delimiter = "&")
+	/**
+	 * Get an OpenURL 1.0 formatted URL
+	 *
+	 * @param string $strResolver	base url of the link resolver
+	 * @param string $strReferer	referrer (unique identifier)
+	 * @return string
+	 */	
+	
+	public function getOpenURL($resolver, $referer = null, $para_delimiter = '&')
 	{
-		// only use openurls
-		
-		if ( $this->config()->getConfig('OPENURL_ONLY', false, false)  )
-		{
-			// make sure the OpenURL source is always summon, not the publisher
-			// or other source where Summon has gotten its data
-			
-			$source = $this->source;
-			$this->source = "Summon";
-				
-			$url = parent::getOpenURL($strResolver, $strReferer, $param_delimiter);
-				
-			$this->source = $source;
-			
-			return $url;
-		}
-		else // use the direct link from summon
+		if ( $this->config()->getConfig('direct_linking', false, false ) )
 		{
 			return $this->direct_link;
 		}
-	}	
+		else
+		{
+			return parent::getOpenURL($resolver, $referer, $para_delimiter);
+		}
+	}
+	
+	/**
+	 * Map the source data to record properties
+	 */	
 	
 	protected function map($document)
 	{
-		$this->source = "Summon";
-		$this->database_name = $this->extractValue($document, "Source/0");;
+		$this->database_name = $this->extractValue($document, "Source/0");
 		
 		$this->record_id = $this->extractValue($document, "ID/0");
 		$this->score = $this->extractValue($document, "Score/0");
@@ -100,8 +107,22 @@ class Record extends Xerxes\Record
 		// basic info
 		
 		$this->language = $this->extractValue($document, "Language/0");
-		$this->year = $this->extractValue($document, "PublicationDate_xml/0/year");
 		$this->extent = $this->extractValue($document, "PageCount/0");
+		
+		// date
+		
+		$this->year = (int) $this->extractValue($document, "PublicationDate_xml/0/year");
+		$this->month = (int) $this->extractValue($document, "PublicationDate_xml/0/month");
+		$this->day = (int) $this->extractValue($document, "PublicationDate_xml/0/day");
+		
+		// only use this if it has text in it
+		
+		$publication_date = $this->extractValue($document, "PublicationDate_xml/0/text");
+		
+		if ( preg_match('/[a-zA-Z]{1}/', $publication_date) )
+		{
+			$this->publication_date = $publication_date;
+		}
 		
 		// format
 		
@@ -131,9 +152,28 @@ class Record extends Xerxes\Record
 		$this->end_page = $this->extractValue($document, "EndPage/0");
 		$this->doi = $this->extractValue($document, "DOI/0");
 		
-		$openurl = $this->extractValue($document, "openUrl");
+		// direct link
+		
 		$this->direct_link = $this->extractValue($document, "link");
+		
+		// original record link
+		
 		$uri = $this->extractValue($document, "URI/0");
+		
+		if ( $uri != '' )
+		{
+			$this->links[] = new Link($uri, Link::ORIGINAL_RECORD);
+		}
+		
+		// subscription
+		
+		$has_full_text = (int) $this->extractValue($document, 'hasFullText');
+		$in_holdings = (int) $this->extractValue($document, 'inHoldings');
+			
+		if ($has_full_text == 1 && $in_holdings == 1)
+		{
+			$this->setSubscription(true);
+		}		
 		
 		// peer reviewed
 		
