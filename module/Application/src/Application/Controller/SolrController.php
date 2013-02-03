@@ -2,7 +2,8 @@
 
 namespace Application\Controller;
 
-use Application\Model\Solr\Engine;
+use Application\Model\Solr\Engine,
+	Zend\Mvc\MvcEvent;
 
 class SolrController extends SearchController
 {

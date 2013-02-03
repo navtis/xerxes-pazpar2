@@ -2,7 +2,8 @@
 
 namespace Application\Model\Search;
 
-use Xerxes\Utility\Registry,
+use Xerxes\Utility\Cache,
+	Xerxes\Utility\Registry,
 	Xerxes\Utility\Request,
 	Zend\Http\Client;
 
@@ -26,12 +27,16 @@ abstract class Engine
 	protected $config; // local search engine config
 	protected $query; // search query
 	
+	private $cache; // cache object
+	
 	/**
 	 * Constructor
 	 */
 	
 	public function __construct()
 	{
+		$this->cache = new Cache();
+		
 		// application config
 		
 		$this->registry = Registry::getInstance();
@@ -115,5 +120,76 @@ abstract class Engine
 		{
 			return new Query($request, $this->getConfig());
 		}
+	}
+	
+	/**
+	 * Check for previously cached results
+	 * 
+	 * @param string|Query $query
+	 * @return null|ResultSet     null if no previously cached results
+	 */
+	
+	public function getCachedResults($query)
+	{
+		// if cache is turned off, then don't bother looking up cache
+		
+		if ( $this->config->getConfig('CACHE_RESULTS', false, false) == false )
+		{
+			return null;
+		}
+		
+		$id = $this->getCacheID($query);
+		
+		$results = $this->cache->get($id);
+		
+		return unserialize($results);
+	}
+	
+	/**
+	 * Cache search results
+	 * 
+	 * @param ResultSet $results
+	 * @param string|Query $query
+	 */
+	
+	public function setCachedResults(ResultSet $results, $query)
+	{
+		// if cache is turned off, then don't bother caching
+		
+		if ( $this->config->getConfig('CACHE_RESULTS', false, false) == false )
+		{
+			return null;
+		}		
+		
+		$id = $this->getCacheID($query);
+		
+		$this->cache->set($id, serialize($results));
+	}
+	
+	/**
+	 * calculate query identifier
+	 * 
+	 * @param string|Query $query
+	 */
+	
+	protected function getCacheID($query)
+	{
+		if ( $query == '' )
+		{
+			throw new \DomainException("Query ID cannot be empty");
+		}
+		
+		$id = 'results';
+		
+		if ( $query instanceof Query)
+		{
+			$id .= $query->getUrlHash();
+		}
+		else
+		{
+			$id .= $query;
+		}
+		
+		return $id;
 	}
 }

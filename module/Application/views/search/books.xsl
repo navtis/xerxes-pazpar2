@@ -121,18 +121,14 @@
 			<div>
 				<dt><xsl:copy-of select="$text_results_author" />:</dt>
 				<dd>
-					<a href="{authors/author/url}">
-						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/aufirst" />
-						<xsl:text> </xsl:text>
-						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/auinit" />
-						<xsl:text> </xsl:text>
-						<xsl:value-of select="authors/author[@type = 'personal' and not(@additional)]/aulast" />
-					</a>
+					<xsl:for-each select="authors/author[@type = 'personal' and not(@additional)]">
+						<xsl:call-template name="record_author_display" />
+					</xsl:for-each>
 				</dd>
 			</div>
 		</xsl:if>
 		
-	</xsl:template>	
+	</xsl:template>
 	
 	<!-- 
 		TEMPLATE RECORD AUTHORS BOTTOM
@@ -147,23 +143,7 @@
 			<ul>
 				<xsl:for-each select="authors/author[@additional='true']">
 					<li>
-						<a href="{url}">
-							<xsl:choose>
-								<xsl:when test="display">
-									<xsl:value-of select="display" />							
-								</xsl:when>
-								<xsl:when test="@type = 'personal'">
-									<xsl:value-of select="aufirst" />
-									<xsl:text> </xsl:text>
-									<xsl:value-of select="auinit" />
-									<xsl:text> </xsl:text>
-									<xsl:value-of select="aulast" />								
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:value-of select="aucorp" />
-								</xsl:otherwise>
-							</xsl:choose>
-						</a>
+						<xsl:call-template name="record_author_display" />
 					</li>
 				</xsl:for-each>
 			</ul>
@@ -172,6 +152,22 @@
 	
 	</xsl:template>
 
+	<!-- 
+		TEMPLATE RECORD EDITION
+		additional authors only 
+	-->
+	
+	<xsl:template name="record_edition">
+			
+		<xsl:if test="edition">
+			<div>
+				<dt><xsl:copy-of select="$text_record_edition" />:</dt>
+				<dd><xsl:value-of select="edition" /></dd>
+			</div>
+		</xsl:if>
+		
+	</xsl:template>		
+	
 	<!-- 
 		TEMPLATE: BRIEF RESULTS
 		override and choose book
@@ -570,13 +566,17 @@
 			<tr>
 				<th>Database</th>
 				<th>Coverage</th>
-				<th>Information</th>
+				<xsl:if test="../holdings/electronicResources//electronicResource/package">
+					<th>Information</th>
+				</xsl:if>
 			</tr>
 			<xsl:for-each select="../holdings/electronicResources/electronicResource">
 				<tr>
 					<td><a href="{link}"><xsl:value-of select="database" /></a></td>
 					<td><xsl:value-of select="coverage" /></td>
-					<td><a href="{package}">About resource</a></td>
+					<xsl:if test="package">
+						<td><a href="{package}">About resource</a></td>
+					</xsl:if>
 				</tr>
 			</xsl:for-each>
 			</table>
@@ -687,26 +687,42 @@
 	-->	
 	
 	<xsl:template name="availability_hold">
+				
+		<xsl:choose>
 		
-		<xsl:if test="//request/action = 'record'">
+			<!-- Recall -->
+	
+			<xsl:when test="//config/enable_recall = 'true' and not(../holdings//item/availability = '1') and ../holdings/hold_url">
 			
-			<xsl:choose>
+				<div class="results-hold">
+					<a href="{../holdings/hold_url}" target="{$link_target}" class="record-action" data-role="button">
+						<xsl:call-template name="img_hold">
+							<xsl:with-param name="class">mini-icon link-resolver-link</xsl:with-param>
+						</xsl:call-template>
+						<xsl:text> </xsl:text>
+						<xsl:copy-of select="$text_results_record_recall" />
+					</a>
+				</div>
+				
+			</xsl:when>
 			
-				<!-- Recall -->
-		
-				<xsl:when test="not(//item/availability = '1') and //config/enable_recall = 'true'">
-					<p><strong><a href="{../holdings/hold_url}"><xsl:copy-of select="$text_results_record_recall" /></a></strong></p>
-				</xsl:when>
-				
-				<!-- Hold -->
-				
-				<xsl:when test="//config/enable_holds = 'true'">				
-					<p><strong><a href="{../holdings/hold_url}"><xsl:copy-of select="$text_results_record_hold" /></a></strong></p>
-				</xsl:when>
-				
-			</xsl:choose>
+			<!-- Hold (only appears on the full record) -->
 			
-		</xsl:if>
+			<xsl:when test="//config/enable_holds = 'true' and ../holdings/hold_url and //request/action = 'record'">			
+				
+				<div class="results-hold">
+					<a href="{../holdings/hold_url}" target="{$link_target}" class="record-action" data-role="button">
+						<xsl:call-template name="img_hold">
+							<xsl:with-param name="class">mini-icon link-resolver-link</xsl:with-param>
+						</xsl:call-template>
+						<xsl:text> </xsl:text>
+						<xsl:copy-of select="$text_results_record_hold" />
+					</a>
+				</div>
+				
+			</xsl:when>
+			
+		</xsl:choose>
 	
 	</xsl:template>
 	
@@ -721,7 +737,7 @@
 		
 		<xsl:if test="count(../holdings/items/item)">
 		
-			<xsl:if test="../url_open_redirect">
+			<xsl:if test="../url_open_redirect and not(//config/no_link_resolver)">
 		
 				<div class="results-availability">
 					<a target="{$link_target}" href="{../url_open_redirect}" class="record-action" data-role="button">
@@ -747,7 +763,9 @@
 		
 			<div id="sms-option" class="results-availability record-action">
 	
-				<xsl:call-template name="img_phone" />
+				<xsl:call-template name="img_phone">
+					<xsl:with-param name="class">mini-icon link-resolver-link</xsl:with-param>
+				</xsl:call-template>
 				<xsl:text> </xsl:text>
 				<a id="sms-link" href="{../url_sms}">Send location to your phone</a> 
 			

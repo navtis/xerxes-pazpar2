@@ -9,6 +9,7 @@ use Application\Model\Search\Engine,
 	Application\Model\Search\Spelling\Suggestion,
 	Xerxes\Record,
 	Xerxes\Record\Author,
+	Xerxes\Record\Bibliographic\LinkedItem,
 	Xerxes\Record\Subject,
 	Xerxes\Utility\Parser,
 	Xerxes\Utility\Request,
@@ -66,6 +67,13 @@ class Search
 		if ( $stop > $total )
 		{
 			$stop = $total;
+		}
+		
+		// weird boundary case introduced by ebsco hacks
+		
+		if ( $start > $stop )
+		{
+			$start = $stop - $max;
 		}
 		
 		return array ( 
@@ -272,6 +280,7 @@ class Search
 			foreach ( $xerxes_record->getAuthors() as $author )
 			{
 				$author->url = $this->linkAuthor($author);
+				$author->url_title = $this->linkAuthorTitle($author);
 			}
 			
 			// subject links
@@ -279,6 +288,18 @@ class Search
 			foreach ( $xerxes_record->getSubjects() as $subject )
 			{
 				$subject->url = $this->linkSubject($subject);
+			}
+
+			// related titles link
+			
+			foreach ( $xerxes_record->getPrecedingTitles() as $title )
+			{
+				$title->url = $this->linkRelatedTitle($title);
+			}
+
+			foreach ( $xerxes_record->getSucceedingTitles() as $title )
+			{
+				$title->url = $this->linkRelatedTitle($title);
 			}			
 			
 			// full-record link
@@ -478,6 +499,8 @@ class Search
 			
 			foreach ( $search->xpath("//option") as $option )
 			{
+				$id = (string) $option["id"] . '_' . $this->query->getHash();
+				
 				// format the number
 				
 				// is this the current tab?
@@ -485,20 +508,35 @@ class Search
 				if ( $controller_map->getControllerName() == (string) $option["id"] 
 				     && ( $this->request->getParam('source') == (string) $option["source"] 
 				     	|| (string) $option["source"] == '') )
-				    {
-				    	$option->addAttribute('current', "1");	
-				    }
+				{
+				   	// mark as current
+					
+					$option->addAttribute('current', "1");
+				    	
+				   	// keep the current url, too, minus the start #
+				    	
+				   	$params = $this->request->getParams();
+				   	$params['start'] = null;
+				    	
+				   	$this->request->setSessionData("url-$id", $this->request->url_for($params));
+				    	
+				}
 				
 				// url
 				
-				$params = $query->extractSearchParams();
-				
-				$params['controller'] = $controller_map->getUrlAlias((string) $option["id"]);
-				$params['action'] = "results";
-				$params['source'] = (string) $option["source"];
-				$params['sort'] = $this->request->getParam('sort');
-				
-				$url = $this->request->url_for($params);
+				$url = $this->request->getSessionData("url-$id"); // already cached, so use it
+
+				if ( $url == null ) // create one based on the search terms only!
+				{
+					$params = $query->extractSearchParams();
+					
+					$params['controller'] = $controller_map->getUrlAlias((string) $option["id"]);
+					$params['action'] = "results";
+					$params['source'] = (string) $option["source"];
+					$params['sort'] = $this->request->getParam('sort');
+					
+					$url = $this->request->url_for($params);
+				}
 				
 				$option->addAttribute('url', $url);
 				
@@ -640,9 +678,66 @@ class Search
 	{
 		$arrParams = $this->lateralLink();
 		$arrParams['field'] = 'author';
-		$arrParams['query'] = $author->getName();
+		
+		// we've defined a specific searchable string for this author,
+		// so take that instead and make it quoted for exactness
+		
+		if ( $author->search_string != "" )
+		{
+			$arrParams['query'] = '"' . $author->search_string . '"';
+		}
+		else // just the regular author name, no quotes
+		{		
+			$arrParams['query'] = $author->getName();
+		}
 
 		return $this->request->url_for($arrParams);
+	}
+	
+	/**
+	 * URL for author/title
+	 *
+	 * @param Author $author
+	 * @return string url
+	 */
+	
+	public function linkAuthorTitle( Author $author )
+	{
+		if ( $author->title != '')
+		{
+			$arrParams = $this->lateralLink();
+			$arrParams['field'] = 'title';
+			$arrParams['query'] = $author->title;
+		
+			return $this->request->url_for($arrParams);
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	/**
+	 * URL for related title
+	 *
+	 * @param LinkedItem $item
+	 * @return string url
+	 */
+	
+	public function linkRelatedTitle( LinkedItem $item )
+	{
+		if ( $item->title != '')
+		{
+			$arrParams = $this->lateralLink();
+			$arrParams['field'] = 'title';
+			$arrParams['query'] = $item->title;
+	
+			return $this->request->url_for($arrParams);
+		}
+		else
+		{
+			return null;
+		}
 	}	
 	
 	/**
@@ -754,10 +849,8 @@ class Search
 	{
 		$params = $this->currentParams();
 		
-		// remove the current sort, since we'll add the new
-		// sort explicitly to the url
-		
-		unset($params["sort"]);
+		unset($params["sort"]); // remove the current sort
+		unset($params["start"]); // send us back to the first page
 		
 		return $params;
 	}

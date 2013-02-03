@@ -109,6 +109,7 @@
 			<xsl:call-template name="additional_full_record_data_main_top" />
 			<xsl:call-template name="record_uniform-title" /> <!-- uniform title -->
 			<xsl:call-template name="record_authors_top" /> <!-- author wrapper -->
+			<xsl:call-template name="record_edition" /> <!-- edition (not available in articles) -->
 			<xsl:call-template name="record_conference" /> <!-- Conference -->
 			<xsl:call-template name="record_format" /> <!-- Format -->
 			<xsl:call-template name="record_year" /> <!-- Year -->
@@ -184,11 +185,7 @@
 			<dd>
 				<xsl:for-each select="authors/author[@type = 'personal']">
 									
-					<a href="{url}">
-						<xsl:value-of select="aufirst" /><xsl:text> </xsl:text>
-						<xsl:value-of select="auinit" /><xsl:text> </xsl:text>
-						<xsl:value-of select="aulast" /><xsl:text> </xsl:text>
-					</a>
+					<xsl:call-template name="record_author_display" />
 					
 					<xsl:if test="following-sibling::author[@type = 'personal']">
 						<xsl:text> ; </xsl:text>
@@ -246,6 +243,39 @@
 			</div>
 		</xsl:if>
 	</xsl:template>
+
+	<!--
+		TEMPLATE: RECORD AUTHOR DISPLAY
+	-->		
+	
+	<xsl:template name="record_author_display">
+	
+		<a href="{url}">
+			<xsl:choose>
+				<xsl:when test="display">
+					<xsl:value-of select="display" />							
+				</xsl:when>
+				<xsl:when test="@type = 'personal'">
+					<xsl:value-of select="aufirst" />
+					<xsl:text> </xsl:text>
+					<xsl:value-of select="auinit" />
+					<xsl:text> </xsl:text>
+					<xsl:value-of select="aulast" />								
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="aucorp" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</a>
+		
+		<xsl:if test="title">
+
+			<xsl:text>, </xsl:text>
+			<a href="{url_title}"><xsl:value-of select="title" /></a>		
+
+		</xsl:if>
+		
+	</xsl:template>	
 
 	<!--
 		TEMPLATE: RECORD FORMAT
@@ -630,8 +660,15 @@
 
 			<h2>Continues</h2>
 			<ul>
-				<xsl:for-each select="journal_title_continues">
-					<li><xsl:value-of select="journal_title_continue" /></li>
+				<xsl:for-each select="journal_title_continues/journal_title_continue">
+					<li>
+						<a href="{url}"><xsl:value-of select="title" /></a>
+						<xsl:text> -- </xsl:text>
+						<xsl:for-each select="notes/note">
+							<xsl:value-of select="text()" />
+							<xsl:text> </xsl:text>
+						</xsl:for-each>
+					</li>
 				</xsl:for-each>
 			</ul>
 
@@ -642,8 +679,15 @@
 
 			<h2>Continued by</h2>
 			<ul>
-				<xsl:for-each select="journal_title_continued_by/journal_title_continued_by">
-					<li><xsl:value-of select="text()" /></li>
+				<xsl:for-each select="journal_title_continued_by/linkeditem">
+					<li>
+						<a href="{url}"><xsl:value-of select="title" /></a>
+						<xsl:text> -- </xsl:text>
+						<xsl:for-each select="notes/note">
+							<xsl:value-of select="text()" />
+							<xsl:text> </xsl:text>
+						</xsl:for-each>
+					</li>
 				</xsl:for-each>
 			</ul>
 
@@ -678,7 +722,7 @@
 <xsl:template name="additional_full_record_data_main_bottom" />
 <xsl:template name="additional_full_record_actions" />
 <xsl:template name="record_authors_bottom" />
-
+<xsl:template name="record_edition" />
 
 
 

@@ -4,6 +4,7 @@ namespace Xerxes\Record;
 
 use Xerxes\Record,
 	Xerxes\Record\Author,
+	Xerxes\Record\Bibliographic\LinkedItem,
 	Xerxes\Marc\ControlField,
 	Xerxes\Marc\DataField,
 	Xerxes\Marc\DataFieldList,
@@ -375,14 +376,14 @@ class Bibliographic extends Record
 		
 		if ( $this->marc->datafield("100")->length() > 0 )
 		{
-			$objXerxesAuthor = $this->makeAuthor( $this->marc->datafield("100"), "a", "personal" );
+			$objXerxesAuthor = $this->makeAuthor( $this->marc->datafield("100"), "a", "personal", false, 'abcdq' );
 			array_push( $this->authors, $objXerxesAuthor );
 		} 
 		elseif ( $objAddAuthor->length() > 0 )
 		{
 			// editor
 
-			$objXerxesAuthor = $this->makeAuthor( $objAddAuthor->item(0), "a", "personal", true);
+			$objXerxesAuthor = $this->makeAuthor( $objAddAuthor->item(0), "a", "personal", true, 'abcdq' );
 			array_push( $this->authors, $objXerxesAuthor );
 			$this->editor = true;
 		}
@@ -401,7 +402,7 @@ class Bibliographic extends Record
 			
 			foreach ( $objAddAuthor as $obj700 )
 			{
-				$objXerxesAuthor = $this->makeAuthor( $obj700, "a", "personal", true );
+				$objXerxesAuthor = $this->makeAuthor( $obj700, "a", "personal", true, 'abcdq' );
 				array_push( $this->authors, $objXerxesAuthor );
 			}
 		}
@@ -410,7 +411,7 @@ class Bibliographic extends Record
 		
 		if ( (string) $this->marc->datafield("110")->subfield("ab") != "" )
 		{
-			$objXerxesAuthor = $this->makeAuthor( $this->marc->datafield("110"), "ab", "corporate" );
+			$objXerxesAuthor = $this->makeAuthor( $this->marc->datafield("110"), "ab", "corporate", false, 'abcd' );
 			array_push( $this->authors, $objXerxesAuthor );
 		}
 		
@@ -420,7 +421,7 @@ class Bibliographic extends Record
 		{
 			foreach ( $objAddCorp as $objCorp )
 			{
-				$objXerxesAuthor = $this->makeAuthor( $objCorp, "ab", "corporate", true );
+				$objXerxesAuthor = $this->makeAuthor( $objCorp, "ab", "corporate", true, 'abcde' );
 				array_push( $this->authors, $objXerxesAuthor );
 			}
 		}
@@ -429,7 +430,7 @@ class Bibliographic extends Record
 
 		if ( $objConfName->length() > 0)
 		{
-			$objXerxesAuthor = $this->makeAuthor( $objConfName, "anc", "conference" );
+			$objXerxesAuthor = $this->makeAuthor( $objConfName, "anc", "conference", false, 'acdegq' );
 			array_push( $this->authors, $objXerxesAuthor );
 		}
 		
@@ -439,7 +440,7 @@ class Bibliographic extends Record
 		{
 			foreach ( $objAddConf as $objConf )
 			{
-				$objXerxesAuthor = $this->makeAuthor( $objConf, "acn", "conference", true );
+				$objXerxesAuthor = $this->makeAuthor( $objConf, "acn", "conference", true, 'acdegq' );
 				array_push( $this->authors, $objXerxesAuthor );
 			}
 		}
@@ -452,28 +453,43 @@ class Bibliographic extends Record
 	 * @param chars $subfields			list of subfields containing the author data
 	 * @param string $type				[optional] type of author
 	 * @param bool $additional			[optional] whether this author is an additional author
+	 * @param chars $searchable_fields	list of subfields containing the author data that can be searched on
 	 * 
 	 * @return Author
 	 */
 	
-	protected function makeAuthor($author, $subfields, $type, $bolAdditional = false)
+	protected function makeAuthor($author, $subfields, $type, $bolAdditional = false, $searchable_fields = null)
 	{
 		$author_string = "";
-		$author_display = "";		
+		$author_display = "";
+		$author_search_string = "";
+		$title = "";
 		
 		// author can be string or data field
 		
 		if ($author instanceof DataField || $author instanceof DataFieldList)
 		{
 			$author_string = (string) $author->subfield($subfields);
-			$author_display = (string) $author;
+			
+			$author_display = (string) $author->subfield('abcdefghijklmnopqrsuvwxyz1234567890'); // all fields but 't'
+			
+			$title = (string) $author->subfield('t');
+			
+			if ( $searchable_fields != null )
+			{
+				$author_search_string = (string) $author->subfield($searchable_fields);
+			}
 		}
 		else
 		{
 			$author_string = $author;
 		}
 		
-		return new Author($author_string, $author_display, $type, $bolAdditional);
+		$author_obj = new Author($author_string, $author_display, $type, $bolAdditional);
+		$author_obj->search_string = $author_search_string;
+		$author_obj->title = $title;
+		
+		return $author_obj;
 	}
 	
 	/**
@@ -862,16 +878,15 @@ class Bibliographic extends Record
 
 		// continues and continued by
 		
-		foreach ( $this->marc->fieldArray("780") as $continues )
+		foreach ( $this->marc->datafield("780") as $continues )
 		{
-			$this->journal_title_continues[] = (string) $continues;
+			$this->journal_title_continues[] = new LinkedItem($continues);
 		}
 		
 		foreach ( $this->marc->datafield("785") as $continued )
 		{
-			$this->journal_title_continued_by = (string) $continued;
+			$this->journal_title_continued_by[] = new LinkedItem($continued);
 		}
-		
 		
 		### volume, issue, pagination
 		
@@ -934,7 +949,7 @@ class Bibliographic extends Record
 			$this->format->setFormat("Book Chapter"); // @todo set normalized as well
 		}
 	}
-
+	
 	/**
 	 * Best-guess regular expression for extracting volume, issue, pagination,
 	 * broken out here for clarity 

@@ -2,9 +2,8 @@
 
 namespace Application\Controller;
 
-use Zend\View\Model\ViewModel;
-
 use Application\View\Helper\Search as SearchHelper,
+	Application\Model\Search\Engine,
 	Application\Model\Search\Query,
 	Application\Model\Search\Result,
 	Application\Model\DataMap\SavedRecords,
@@ -12,7 +11,8 @@ use Application\View\Helper\Search as SearchHelper,
 	Xerxes\Utility\Parser,
 	Xerxes\Utility\Registry,
 	Zend\Mvc\Controller\ActionController,
-	Zend\Mvc\MvcEvent;
+	Zend\Mvc\MvcEvent,
+	Zend\View\Model\ViewModel;
 
 abstract class SearchController extends ActionController
 {
@@ -52,6 +52,12 @@ abstract class SearchController extends ActionController
 		
 		$this->helper = new SearchHelper($e, $this->id, $this->engine);
 	}
+	
+	/**
+	 * Return the search engine for this sytem
+	 * 
+	 * @return Engine
+	 */
 	
 	abstract protected function getEngine();
 	
@@ -173,9 +179,9 @@ abstract class SearchController extends ActionController
 		{
 			$this->request->setSessionData('clear_facets', 'false');
 		}
-		
+
 		// search
-				
+		
 		$results = $this->engine->searchRetrieve($this->query, $start, $max, $internal_sort);
 		
 		// total
@@ -214,12 +220,22 @@ abstract class SearchController extends ActionController
 			// mark we've saved this search log
 			
 			$this->request->setSessionData("stat-$id", (string) $total);
-		
-			// cache it
-			
-			$this->request->setSessionData($id, (string) $total);
 		}
 		
+		// include original record
+		
+		if ( $this->config->getConfig('INCLUDE_ORIGINAL_RECORD_IN_BRIEF_RESULTS', false) )
+		{
+			foreach ( $results->getRecords() as $record )
+			{
+				$record->includeOriginalRecord();
+			}
+		}	
+		
+		
+		// always cache the total based on the last action
+			
+		$this->request->setSessionData($id, (string) $total);
 		
 		// add links
 		

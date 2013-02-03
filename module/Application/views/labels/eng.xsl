@@ -278,6 +278,7 @@ xmlns:php="http://php.net/xsl" exclude-result-prefixes="php">
 	<xsl:variable name="text_record_contents">Contents</xsl:variable>
 	<xsl:variable name="text_record_database">Database</xsl:variable>
 	<xsl:variable name="text_record_degree">Degree</xsl:variable>
+	<xsl:variable name="text_record_edition">Edition</xsl:variable>
 	<xsl:variable name="text_record_format_label">Format</xsl:variable>
 	<xsl:variable name="text_record_inst">Institution</xsl:variable>
 	<xsl:variable name="text_record_language_label">Language</xsl:variable>
@@ -302,8 +303,8 @@ xmlns:php="http://php.net/xsl" exclude-result-prefixes="php">
 	<xsl:variable name="text_results_hint_remove_limit">remove limit</xsl:variable>
 	<xsl:variable name="text_results_no_title">[ No Title ]</xsl:variable>
 	<xsl:variable name="text_results_published_in">Published in</xsl:variable>
-	<xsl:variable name="text_results_record_hold">Place hold</xsl:variable>
-	<xsl:variable name="text_results_record_recall">Recall item</xsl:variable>
+	<xsl:variable name="text_results_record_hold">Place a hold on this item</xsl:variable>
+	<xsl:variable name="text_results_record_recall">Recall this item</xsl:variable>
 	<xsl:variable name="text_results_record_saved">Record saved</xsl:variable>
 	<xsl:variable name="text_results_record_saved_temp">Temporarily Saved</xsl:variable>
 	<xsl:variable name="text_results_record_save_it">Save this record</xsl:variable>

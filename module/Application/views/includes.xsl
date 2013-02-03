@@ -199,6 +199,8 @@
 				</xsl:if>
 			</div>
 			
+			<xsl:call-template name="surround_top" />
+			
 		</xsl:if>
 	
 		<div data-role="page" id="{//config/document}" class="{$surround_template}">
@@ -438,6 +440,7 @@
 		Defined here in case they are not, so as not to stop the proceedings
 	-->
 	
+	<xsl:template name="surround_top" />
 	<xsl:template name="header_div" />
 	<xsl:template name="footer_div" />
 	<xsl:template name="page_name" />
@@ -788,6 +791,13 @@
 	<xsl:param name="title" />
 	<xsl:param name="class" />
 	<img src="{$base_url}/images/phone.png" alt="{$alt}" title="{$title}" class="{$class}" />
+</xsl:template>
+
+<xsl:template name="img_hold">
+	<xsl:param name="alt" />
+	<xsl:param name="title" />
+	<xsl:param name="class" />
+	<img src="{$base_url}/images/famfamfam/accept.png" alt="{$alt}" title="{$title}" class="{$class}" />
 </xsl:template>
 
 <xsl:template name="img_search">
