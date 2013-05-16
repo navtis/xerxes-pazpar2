@@ -154,6 +154,7 @@
 							<!-- facets -->
 							
 							<xsl:call-template name="search_sidebar_facets" />
+							<xsl:call-template name="search_sidebar_additional" />
 							
 						</div>
 				
@@ -255,7 +256,7 @@
 	
 	<xsl:template name="searchbox">
 	
-		<xsl:param name="action"><xsl:value-of select="//request/controller" />/search</xsl:param>
+		<xsl:param name="action"><xsl:value-of select="$base_url" />/<xsl:value-of select="//request/controller" />/search</xsl:param>
 	
 		<form id="form-main-search" action="{$action}" method="get">	
 	
@@ -592,7 +593,7 @@
 
 						<!-- only show the facets if there is more than one -->
 	
-						<xsl:if test="count(facets/facet) &gt; 1">
+						<xsl:if test="count(facets/facet) &gt; 1 or //config/facet_multiple = 'true'">
 			
 							<h3><xsl:value-of select="public" /></h3>
 							
@@ -1394,5 +1395,6 @@
 	<xsl:template name="facet_narrow_results" />
 	<xsl:template name="search_promo" />
 	<xsl:template name="search_login_reminder" />
+	<xsl:template name="search_sidebar_additional" />
 	
 </xsl:stylesheet>
